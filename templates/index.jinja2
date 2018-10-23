@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Turnie.re Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='pure.css') }}" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w"
+        crossorigin="anonymous">
+    <script src="{{ url_for('static', filename='socket.io.js') }}"></script>
+    <style>
+        .main-table {
+          border-width: 0 !important;
+          width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <div class="pure-menu pure-menu-horizontal">
+        <a href="#" class="pure-menu-heading pure-menu-link">Turniere Admin</a>
+        <ul class="pure-menu-list">
+            <li class="pure-menu-item"><a href="#" class="pure-menu-link">News</a></li>
+            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Sports</a></li>
+            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Finance</a></li>
+        </ul>
+    </div>
+    <!-- Matches -->
+    {% for sid, matches in stages %}
+    <h1>
+        {% if matches[0].isgroupmatch %}
+        Gruppe {{ sid + 1 }} <button class="pure-button pure-button-primary" onclick="nextMatches(-1)">Nächste Matches starten</button>
+        {% else %}
+        Stage {{ sid + 1}} <button class="pure-button pure-button-primary" onclick="nextMatches({{ sid }})">Alle Matches starten</button>
+        {% endif %}
+    </h1>
+    <table class="pure-table main-table">
+    <tr>
+    {% for match in matches %}
+    <td style="background-color: {% if match.status == 'NOT_STARTED' %}gray{% elif match.status == 'IN_PROGRESS' %}yellow{% else %}lime{% endif %}">
+    <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}" method="POST">
+        <fieldset>
+            <label for="score1">{{ match.name1 }}</label>
+            <input name="score1" id="score1" type="number" placeholder="{{ match.score1 }} ">
+
+            <label for="score2">{{ match.name2 }}</label>
+            <input name="score2" id="score2" type="number" placeholder="{{ match.score2 }}">
+
+            <label for="isLive" class="pure-checkbox">
+                Live <input name="isLive" id="isLive" type="checkbox" checked>
+            </label>
+            <button type="submit" class="pure-button pure-button-primary">Submit</button>
+        </fieldset>
+    </form>
+    </td>
+    {% if (loop.index % 6) == 0 %}</tr><tr>{% endif %}
+    {% endfor %}
+    </tr>
+    </table>
+    {% endfor %}
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

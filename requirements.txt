@@ -1,0 +1,5 @@
+mechanicalsoup
+requests
+flask
+flask-socketio
+eventlet
