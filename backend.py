@@ -1,13 +1,26 @@
+from collections import namedtuple
+from queue import Queue
 from threading import Thread
 
+Task = namedtuple('Task', ['func', 'params', 'callback'])
 
-class BackendThread(Thread):
-    def __init__(self, queue, session):
+
+def execute_function(function, callback):
+    pass
+
+
+class QueueWorker(Thread):
+    def __init__(self, turniere_instances):
         super()
-        self.queue = queue
-        self.session = session
+        self.turniere_instances = turniere_instances
+        self.queue = Queue()
+
+    def enqueue(self, event):
+        self.queue.put_nowait(event)
 
     def run(self):
         while True:
-            request = self.queue.get()
-            self.session.send(request)
+            task = self.queue.get()
+            print(task)
+            # mark done
+            self.queue.task_done()

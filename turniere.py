@@ -1,12 +1,13 @@
 import mechanicalsoup
-
 from requests import Request
 
 
 class Turniere(object):
-    def __init__(self, base_url, tournament_code):
+    def __init__(self, base_url, tournament_code, username, password):
         self.base_url = base_url
         self.tournament_code = tournament_code
+        self.username = username
+        self.password = password
         self.browser = mechanicalsoup.StatefulBrowser()
 
     def _prepare_request(self, path, method='GET', json=None):
@@ -18,11 +19,11 @@ class Turniere(object):
         request = self._prepare_request(path, method)
         return self.browser.session.send(request)
 
-    def login(self, username, password):
+    def login(self, username=None, password=None):
         self.browser.open(self.base_url + '/login')
         self.browser.select_form('form[action="/login"]')
-        self.browser['username'] = username
-        self.browser['password'] = password
+        self.browser['username'] = username or self.username
+        self.browser['password'] = password or self.password
         self.browser.submit_selected()
 
     def get_matches(self):
@@ -47,14 +48,16 @@ class Turniere(object):
             'score1': score1,
             'score2': score2
         }
-        print(data)
-        request = self._prepare_request('/m/' + str(mid), method='POST', json=data)
+        request = self._prepare_request(
+            '/m/' + str(mid), method='POST', json=data
+        )
         request.headers[csrf_header] = csrf_token
-        r = self.browser.session.send(request)
-        print(r)
+        return self.browser.session.send(request)
 
     def next_group_matches(self):
-        self._send_request('/t/' + self.tournament_code + '/group/next')
+        return self._send_request('/t/' + self.tournament_code + '/group/next')
 
     def next_stage_matches(self, sid):
-        self._send_request('/t/' + self.tournament_code + '/' + sid + '/start')
+        return self._send_request(
+            '/t/' + self.tournament_code + '/' + sid + '/start'
+        )

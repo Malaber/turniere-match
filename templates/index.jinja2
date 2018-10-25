@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='pure.css') }}" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w"
         crossorigin="anonymous">
-    <script src="{{ url_for('static', filename='socket.io.js') }}"></script>
+    <!--<script src="{{ url_for('static', filename='socket.io.js') }}"></script>-->
     <style>
         .main-table {
           border-width: 0 !important;
@@ -31,33 +31,46 @@
     {% for sid, matches in stages %}
     <h1>
         {% if matches[0].isgroupmatch %}
-        Gruppe {{ sid + 1 }} <button class="pure-button pure-button-primary" onclick="nextMatches(-1)">Nächste Matches starten</button>
+        Gruppe {{ sid + 1}}
         {% else %}
-        Stage {{ sid + 1}} <button class="pure-button pure-button-primary" onclick="nextMatches({{ sid }})">Alle Matches starten</button>
+        Stage {{ sid + 1 }}
         {% endif %}
+        <form class="pure-form" action="{{ url_for('next_stage_matches', sid='group' if matches[0].isgroupmatch else sid) }}" method="POST">
+            <fieldset>
+                <label for="sure-{{ sid }}">
+                    <input id="sure-{{ sid }}" type="checkbox" required> Sicher?
+                </label>
+                <label for="sure2-{{ sid }}">
+                    <input id="sure2-{{ sid }}" type="checkbox" required> Sicher?
+                </label>
+                <button type="submit" class="pure-button pure-button-primary">Nächste Matches starten</button>
+            </fieldset>
+        </form>
     </h1>
     <table class="pure-table main-table">
-    <tr>
-    {% for match in matches %}
-    <td style="background-color: {% if match.status == 'NOT_STARTED' %}gray{% elif match.status == 'IN_PROGRESS' %}yellow{% else %}lime{% endif %}">
-    <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}" method="POST">
-        <fieldset>
-            <label for="score1">{{ match.name1 }}</label>
-            <input name="score1" id="score1" type="number" placeholder="{{ match.score1 }} ">
+        <tr>
+            {% for match in matches %}
+            <td style="background-color: {% if match.status == 'NOT_STARTED' %}gray{% elif match.status == 'IN_PROGRESS' %}yellow{% else %}lime{% endif %}">
+                <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}"
+                    method="POST" id="match-{{ match.id }}">
+                    <fieldset>
+                        <label for="score1-{{ match.id }}">{{ match.name1 }}</label>
+                        <input name="score1" id="score1-{{ match.id }}" type="number" value="{{ match.score1 }}">
 
-            <label for="score2">{{ match.name2 }}</label>
-            <input name="score2" id="score2" type="number" placeholder="{{ match.score2 }}">
+                        <label for="score2-{{ match.id }}">{{ match.name2 }}</label>
+                        <input name="score2" id="score2-{{ match.id }}" type="number" value="{{ match.score2 }}">
 
-            <label for="isLive" class="pure-checkbox">
-                Live <input name="isLive" id="isLive" type="checkbox" checked>
-            </label>
-            <button type="submit" class="pure-button pure-button-primary">Submit</button>
-        </fieldset>
-    </form>
-    </td>
-    {% if (loop.index % 6) == 0 %}</tr><tr>{% endif %}
-    {% endfor %}
-    </tr>
+                        <label for="isLive-{{ match.id }}" class="pure-checkbox">
+                            Live <input name="isLive" id="isLive-{{ match.id }}" type="checkbox" {% if match.live %}checked{% endif %}>
+                        </label>
+                        <button type="submit" class="pure-button pure-button-primary">Abschicken</button>
+                    </fieldset>
+                </form>
+            </td>
+            {% if (loop.index % 6) == 0 %}</tr>
+        <tr>{% endif %}
+            {% endfor %}
+        </tr>
     </table>
     {% endfor %}
 
