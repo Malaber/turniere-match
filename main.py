@@ -12,13 +12,13 @@ app.config['SECRET_KEY'] = 'changeme(:'
 username = 'schaedlerdaniel@icloud.com'
 password = '3t9%oCL6$b&RzK86FjnlmEMHayB!h*Q69ML'
 
-tournament_code = '39l3r'
+tournament_code = '26'
 main_instance = Turniere(
-    'http://10.8.0.46:8080', tournament_code, username, password
+    'https://api01.turnie.re', tournament_code, username, password
 )
 
 remote_instance = Turniere(
-    'https://turnie.re', tournament_code, username, password
+    'https://api01.turnie.re', tournament_code, username, password
 )
 
 w = Worker(remote_instance)
@@ -26,16 +26,24 @@ w = Worker(remote_instance)
 
 @app.route('/')
 def index():
-    matches = list(map(lambda m: m['data'], main_instance.get_matches()))
-    stages = {}
-    for match in matches:
-        stageid = match['stageid']
-        stages.setdefault(stageid, [])
-        stages[stageid].append(match)
-    stages_sorted = list(
-        sorted(stages.items(), key=lambda s: s[0], reverse=True)
-    )
-    return render_template('index.jinja2', stages=stages_sorted)
+    stages = main_instance.get_stages()
+    stages_simplified = []
+    for stage in stages:
+        groups = stage['groups']
+        if groups:
+            for group in groups:
+                stages_simplified.append({
+                    'group': True,
+                    'level': group['position'],
+                    'matches': map(lambda g: g['matches'], groups)
+                })
+        else:
+            stages_simplified.append({
+                'group': False,
+                'level': stage['level'],
+                'matches': filter(lambda m: m['state'] != 'not_ready', stage['matches']),
+            })
+    return render_template('index.jinja2', stages=stages_simplified)
 
 
 @app.route('/m/<sid>/next', methods=['POST'])
