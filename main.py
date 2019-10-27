@@ -9,8 +9,8 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'changeme(:'
 
-username = 'schaedlerdaniel@icloud.com'
-password = '3t9%oCL6$b&RzK86FjnlmEMHayB!h*Q69ML'
+username = 'test@test.test'
+password = 'testtest'
 
 tournament_code = '26'
 main_instance = Turniere(
@@ -34,14 +34,16 @@ def index():
             for group in groups:
                 stages_simplified.append({
                     'group': True,
-                    'level': group['position'],
+                    'level': group['number'],
                     'matches': map(lambda g: g['matches'], groups)
                 })
         else:
             stages_simplified.append({
                 'group': False,
                 'level': stage['level'],
-                'matches': filter(lambda m: m['state'] != 'not_ready', stage['matches']),
+                'matches': filter(
+                    lambda m: m['state'] != 'not_ready', stage['matches']
+                ),
             })
     return render_template('index.jinja2', stages=stages_simplified)
 
