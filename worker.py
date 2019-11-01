@@ -3,9 +3,10 @@ from collections import namedtuple
 from queue import Queue
 from threading import Thread
 
-from requests.exceptions import ConnectionError
-
-Match = namedtuple('Match', ['mid', 'score1', 'score2', 'is_live'])
+Match = namedtuple(
+    'Match',
+    ['mid', 'matchscore1', 'matchscore2', 'score1', 'score2', 'is_live']
+)
 
 
 class Worker(Thread):
@@ -19,7 +20,7 @@ class Worker(Thread):
     def run(self):
         while True:
             match = self.queue.get()
-            print('Synchronizing {}'.format(match))
+            print(f'Synchronizing {match}')
             while True:
                 try:
                     self.instance.login()
@@ -37,8 +38,8 @@ class Worker(Thread):
                     break
                 except Exception as e:
                     print(
-                        'Couldn\'t connect to remote instance ({}),'
-                        ' retrying in {}s'.format(e, self.retry_interval)
+                        f'Couldn\'t connect to remote instance ({e}),'
+                        f' retrying in {self.retry_interval}s'
                     )
                     time.sleep(self.retry_interval)
             self.queue.task_done()

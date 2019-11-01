@@ -36,7 +36,7 @@
         {% else %}
         Stage {{ sid + 1 }}
         {% endif %}
-        <form class="pure-form" action="{{ url_for('next_stage_matches', sid='group' if stage.group else sid) }}" method="POST">
+        <form class="pure-form" action="{{ url_for('next_stage_matches', sid='group' if stage.group else stage['id']) }}" method="POST">
             <fieldset>
                 <label for="sure-{{ sid }}">
                     <input id="sure-{{ sid }}" type="checkbox" required> Sicher?
@@ -51,13 +51,17 @@
     <table class="pure-table main-table">
         <tr>
             {% for match in stage.matches %}
-            {% set name1 = match['match_scores'][0]['team']['name'] %}
-            {% set name2 = match['match_scores'][1]['team']['name'] %}
-            {% set score1 = match['match_scores'][0]['points'] %}
-            {% set score2 = match['match_scores'][1]['points'] %}
+            {% set matchscore1 = match['match_scores'][0] %}
+            {% set matchscore2 = match['match_scores'][1] %}
+            {% set name1 = matchscore1['team']['name'] %}
+            {% set name2 = matchscore2['team']['name'] %}
+            {% set score1 = matchscore1['points'] %}
+            {% set score2 = matchscore2['points'] %}
             <td style="background-color: {% if match.state == 'not_started' %}gray{% elif match.state == 'in_progress' %}yellow{% else %}lime{% endif %}">
                 <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}"
                     method="POST" id="match-{{ match.id }}">
+                    <input type="hidden" name="matchscore1" value="{{ matchscore1['id'] }}">
+                    <input type="hidden" name="matchscore2" value="{{ matchscore2['id'] }}">
                     <fieldset>
                         <label for="score1-{{ match.id }}">{{ name1 }}</label>
                         <input name="score1" id="score1-{{ match.id }}" type="number" value="{{ score1 }}">

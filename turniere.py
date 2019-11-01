@@ -22,8 +22,6 @@ class Turniere(object):
         r = s.send(req.prepare())
         if r:
             return r
-        elif r.status_code in [401, 403]:
-            logging.debug(r.text)
         else:
             raise Exception(f'Invalid response: {r}')
 
@@ -46,4 +44,34 @@ class Turniere(object):
         }
 
     def get_stages(self):
-        return self._request(f'/tournaments/{self.tournament_code}')['stages']
+        return self._request(
+            f'/tournaments/{self.tournament_code}'
+        ).json()['stages']
+
+    def next_stage_matches(self, sid):
+        # fetch stage
+        stage = self._request(f'/stages/{sid}').json()
+        match_patch = {
+            'state': 'in_progress'
+        }
+        for match in stage['matches']:
+            mid = match['id']
+            # start match
+            self._request(f'/matches/{mid}', method='PATCH', json=match_patch)
+
+    def submit_results(self, match):
+        self._request(
+            f'/match_scores/{match.matchscore1}', method='PATCH', json={
+                'points': match.score1
+            }
+        )
+        self._request(
+            f'/match_scores/{match.matchscore2}', method='PATCH', json={
+                'points': match.score2
+            }
+        )
+        if not match.is_live:
+            # end match
+            self._request(f'/matches/{match.mid}', method='PATCH', json={
+                'state': 'finished'
+            })
