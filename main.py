@@ -1,9 +1,10 @@
+import logging
+
 from flask import Flask, redirect, render_template, request
 
 from turniere import Turniere
-from worker import Match, Worker
+from worker import Action, Match, Worker
 
-import logging
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
@@ -12,7 +13,7 @@ app.config['SECRET_KEY'] = 'changeme(:'
 username = 'test@test.test'
 password = 'testtest'
 
-tournament_code = '5'
+tournament_code = '7'
 main_instance = Turniere(
     'https://api01.turnie.re', tournament_code, username, password
 )
@@ -55,10 +56,10 @@ def next_stage_matches(sid):
     main_instance.login()
     if sid == 'group':
         main_instance.next_group_matches()
-        #w.queue.put_nowait('group')
+        w.queue.put_nowait(Action('next_group_matches', None))
     else:
         main_instance.next_stage_matches(str(sid))
-        #w.queue.put_nowait(int(sid))
+        w.queue.put_nowait(Action('next_stage_matches', sid))
     return redirect('/')
 
 
@@ -73,7 +74,7 @@ def submit_match_result(mid):
     match = Match(mid, matchscore1, matchscore2, score1, score2, is_livescore)
     main_instance.login()
     main_instance.submit_results(match)
-    #w.queue.put_nowait(match)
+    w.queue.put_nowait(Action('submit_results', match))
     return redirect('/#match-' + match.mid)
 
 
@@ -81,9 +82,10 @@ def submit_match_result(mid):
 def stop_group_stage(sid):
     main_instance.login()
     main_instance.stop_group_stage(sid)
+    w.queue.put_nowait(Action('stop_group_stage', sid))
     return redirect('/')
 
 
 if __name__ == '__main__':
-    #w.start()
+    w.start()
     app.run(host='0.0.0.0', port=7070, debug=True)

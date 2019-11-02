@@ -1,8 +1,10 @@
+import logging
 import time
 from collections import namedtuple
 from queue import Queue
 from threading import Thread
 
+Action = namedtuple('Action', ['type', 'data'])
 Match = namedtuple(
     'Match',
     ['mid', 'matchscore1', 'matchscore2', 'score1', 'score2', 'is_live']
@@ -18,28 +20,30 @@ class Worker(Thread):
         self.done = False
 
     def run(self):
-        while True:
-            match = self.queue.get()
-            print(f'Synchronizing {match}')
+        while not self.done:
+            action = self.queue.get()
+            logging.info(f'Synchronizing {action}')
             while True:
                 try:
                     self.instance.login()
-                    if type(match) == str:
+                    if action.type == 'next_group_matches':
                         self.instance.next_group_matches()
-                    elif type(match) == int:
-                        self.instance.next_stage_matches(str(match))
+                    elif action.type == 'next_stage_matches':
+                        self.instance.next_stage_matches(action.data)
+                    elif action.type == 'submit_results':
+                        self.instance.submit_results(action.data)
+                    elif action.type == 'stop_group_stage':
+                        self.instance.stop_group_stage(action.data)
                     else:
-                        self.instance.submit_results(
-                            match.mid,
-                            match.score1,
-                            match.score2,
-                            match.is_live
-                        )
-                    break
+                        raise Exception('This shouldn\'t happen')
                 except Exception as e:
-                    print(
+                    logging.info(
                         f'Couldn\'t connect to remote instance ({e}),'
                         f' retrying in {self.retry_interval}s'
                     )
                     time.sleep(self.retry_interval)
             self.queue.task_done()
+
+    def stop(self):
+        logging.info('Stopping worker')
+        self.done = True
