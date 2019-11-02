@@ -23,8 +23,8 @@ class Turniere(object):
         if r:
             return r
         else:
-            raise Exception(f'Invalid response: {r}')
-    
+            raise Exception(f'Invalid response: {r}: {r.json()}')
+
     def _start_match(self, mid):
         self._request(f'/matches/{mid}', method='PATCH', json={
             'state': 'in_progress'
