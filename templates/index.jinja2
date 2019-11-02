@@ -72,7 +72,7 @@
                         <label for="isLive-{{ match.id }}" class="pure-checkbox">
                             Live <input name="isLive" id="isLive-{{ match.id }}" type="checkbox" {% if match.state == 'in_progress' %}checked{% endif %}>
                         </label>
-                        <button type="submit" class="pure-button pure-button-primary">Abschicken</button>
+                        <button type="submit" class="pure-button pure-button-primary" {% if match.state != 'in_progress' %}disabled{% endif %}>Abschicken</button>
                     </fieldset>
                 </form>
             </td>
