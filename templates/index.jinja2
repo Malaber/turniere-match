@@ -17,21 +17,12 @@
 </head>
 
 <body>
-    <!-- Navbar -->
-    <div class="pure-menu pure-menu-horizontal">
-        <a href="#" class="pure-menu-heading pure-menu-link">Turniere Admin</a>
-        <ul class="pure-menu-list">
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">News</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Sports</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Finance</a></li>
-        </ul>
-    </div>
     <!-- Matches -->
     {% for stage in stages %}
     {% set sid = stage['level'] %}
     <h1>
         {% if stage.group %}
-        Gruppe {{ sid + 1 }}
+        Gruppe {{ sid }}
         {% else %}
         Stage {{ sid + 1 }}
         {% endif %}
