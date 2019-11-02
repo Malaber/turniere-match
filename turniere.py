@@ -24,6 +24,11 @@ class Turniere(object):
             return r
         else:
             raise Exception(f'Invalid response: {r}')
+    
+    def _start_match(self, mid):
+        self._request(f'/matches/{mid}', method='PATCH', json={
+            'state': 'in_progress'
+        })
 
     def login(self):
         r = self._request(
@@ -51,13 +56,31 @@ class Turniere(object):
     def next_stage_matches(self, sid):
         # fetch stage
         stage = self._request(f'/stages/{sid}').json()
-        match_patch = {
-            'state': 'in_progress'
-        }
         for match in stage['matches']:
-            mid = match['id']
-            # start match
-            self._request(f'/matches/{mid}', method='PATCH', json=match_patch)
+            self._start_match(match['id'])
+
+    def next_group_matches(self):
+        # fetch groups
+        groups = list(filter(lambda s: s['level'] == -1, self._request(
+            f'/tournaments/{self.tournament_code}'
+        ).json()['stages']))[0]['groups']
+        # start first not started match in each group
+        for group in groups:
+            target_matches = list(sorted(
+                filter(lambda m: m['state'] == 'not_started', group['matches']),
+                key=lambda m: m['id'],
+            ))
+            if target_matches:
+                self._start_match(target_matches[0]['id'])
+            else:
+                logging.info(
+                    'Tried to start next matches, but there aren\'t any'
+                )
+
+    def stop_group_stage(self, sid):
+        self._request(f'/stages/{sid}', method='PATCH', json={
+            'state': 'finished'
+        })
 
     def submit_results(self, match):
         self._request(

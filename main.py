@@ -12,7 +12,7 @@ app.config['SECRET_KEY'] = 'changeme(:'
 username = 'test@test.test'
 password = 'testtest'
 
-tournament_code = '3'
+tournament_code = '5'
 main_instance = Turniere(
     'https://api01.turnie.re', tournament_code, username, password
 )
@@ -36,7 +36,7 @@ def index():
                     'id': stage['id'],
                     'group': True,
                     'level': group['number'],
-                    'matches': map(lambda g: g['matches'], groups)
+                    'matches': sorted(group['matches'], key=lambda m: m['id']),
                 })
         else:
             stages_simplified.append({
@@ -55,9 +55,8 @@ def next_stage_matches(sid):
     main_instance.login()
     if sid == 'group':
         main_instance.next_group_matches()
-        w.queue.put_nowait('group')
+        #w.queue.put_nowait('group')
     else:
-        print(sid)
         main_instance.next_stage_matches(str(sid))
         #w.queue.put_nowait(int(sid))
     return redirect('/')
@@ -78,6 +77,13 @@ def submit_match_result(mid):
     return redirect('/#match-' + match.mid)
 
 
+@app.route('/m/<sid>/stop', methods=['POST'])
+def stop_group_stage(sid):
+    main_instance.login()
+    main_instance.stop_group_stage(sid)
+    return redirect('/')
+
+
 if __name__ == '__main__':
-    w.start()
+    #w.start()
     app.run(host='0.0.0.0', port=7070, debug=True)
