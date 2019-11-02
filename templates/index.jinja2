@@ -53,8 +53,9 @@
     <table class="pure-table main-table">
         <tr>
             {% for match in stage.matches %}
-            {% set matchscore1 = match['match_scores'][0] %}
-            {% set matchscore2 = match['match_scores'][1] %}
+            {% set matchscores = match['match_scores']|sort(attribute='id') %}
+            {% set matchscore1 = matchscores[0] %}
+            {% set matchscore2 = matchscores[1] %}
             {% set name1 = matchscore1['team']['name'] %}
             {% set name2 = matchscore2['team']['name'] %}
             {% set score1 = matchscore1['points'] %}
