@@ -1,4 +1,5 @@
 FROM python:3.7-alpine
+RUN apk add --no-cache build-base tzdata
 COPY . /app
 WORKDIR /app
 RUN pip install -r requirements.txt
