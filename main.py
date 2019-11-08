@@ -13,9 +13,9 @@ app.config['SECRET_KEY'] = 'changeme(:'
 username = 'test@test.test'
 password = 'testtest'
 
-tournament_code = '7'
+tournament_code = '16'
 main_instance = Turniere(
-    'https://api01.turnie.re', tournament_code, username, password
+    'http://localhost:3001', tournament_code, username, password
 )
 
 remote_instance = Turniere(
@@ -37,16 +37,16 @@ def index():
                     'id': stage['id'],
                     'group': True,
                     'level': group['number'],
-                    'matches': sorted(group['matches'], key=lambda m: m['id']),
+                    'matches': sorted(group['matches'], key=lambda m: m['position']),
                 })
         else:
             stages_simplified.append({
                 'id': stage['id'],
                 'group': False,
                 'level': stage['level'],
-                'matches': filter(
+                'matches': sorted(filter(
                     lambda m: m['state'] != 'not_ready', stage['matches']
-                ),
+                ), key=lambda m: m['position']),
             })
     return render_template('index.jinja2', stages=stages_simplified)
 

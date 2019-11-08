@@ -28,12 +28,16 @@ class Worker(Thread):
                     self.instance.login()
                     if action.type == 'next_group_matches':
                         self.instance.next_group_matches()
+                        break
                     elif action.type == 'next_stage_matches':
                         self.instance.next_stage_matches(action.data)
+                        break
                     elif action.type == 'submit_results':
                         self.instance.submit_results(action.data)
+                        break
                     elif action.type == 'stop_group_stage':
                         self.instance.stop_group_stage(action.data)
+                        break
                     else:
                         raise Exception('This shouldn\'t happen')
                 except Exception as e:

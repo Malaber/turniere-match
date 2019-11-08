@@ -54,6 +54,7 @@ class Turniere(object):
         ).json()['stages']
 
     def next_stage_matches(self, sid):
+        logging.info('Starting next playoff matches for %d', sid)
         # fetch stage
         stage = self._request(f'/stages/{sid}').json()
         for match in stage['matches']:
@@ -61,6 +62,7 @@ class Turniere(object):
 
     def next_group_matches(self):
         # fetch groups
+        logging.info('Starting new group matches')
         groups = list(filter(lambda s: s['level'] == -1, self._request(
             f'/tournaments/{self.tournament_code}'
         ).json()['stages']))[0]['groups']
@@ -68,7 +70,7 @@ class Turniere(object):
         for group in groups:
             target_matches = list(sorted(
                 filter(lambda m: m['state'] == 'not_started', group['matches']),
-                key=lambda m: m['id'],
+                key=lambda m: m['position'],
             ))
             if target_matches:
                 self._start_match(target_matches[0]['id'])
