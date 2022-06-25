@@ -1,22 +1,37 @@
-import sys
+import random
+import csv
 
 from turniere import Turniere
 
 
 if __name__ == '__main__':
-    name = sys.argv[1]
     #t = Turniere('https://api01.turnie.re', '', 'test@test.test', 'testtest')
-    t = Turniere('http://localhost:3000', '', 'test@test.test', 'testtest')
+    t = Turniere('http://localhost:3001', '', 'test@test.test', 'testtesttest')
     t.login()
+
+    teams = []
+    with open('t7_checkin.csv', newline='') as csvfile:
+        turniere_checkin_csv = csv.DictReader(csvfile, delimiter=',')
+        for row in turniere_checkin_csv:
+            teams.append(row['Team Name'])
+
+    random.shuffle(teams)
+    teams = teams[:128]
+
+    groups = zip(*([iter(teams)] * 4))
+    teams_with_groups = []
+    for num, group in enumerate(groups):
+        for team in group:
+            teams_with_groups.append({
+                "name": team,
+                "group": group
+            })
+
     t._request('/tournaments', method='POST', json={
-        'name': name,
-        'description': '',
-        'public': False,
-        'group_stage': True,
-        'playoff_teams_amount': 64,
-        'teams': [
-            {"name": f'{group}.{team}', "group": group}
-            for team in range(5)
-            for group in range(33)
-        ]
+        "name": "7. Beerpong Turnier",
+        "description": "7. Beerpong Turnier von Beerpong Weinstraße",
+        "public": True,
+        "group_stage": True,
+        "teams": teams_with_groups,
+        "playoff_teams_amount": 64
     })
