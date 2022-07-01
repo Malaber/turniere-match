@@ -13,13 +13,13 @@ app.config['SECRET_KEY'] = 'changeme(:'
 username = 'test@test.test'
 password = 'testtest'
 
-tournament_code = '16'
+tournament_code = '13'
 main_instance = Turniere(
-    'http://localhost:3001', tournament_code, username, password
+    'http://localhost:3000', tournament_code, username, password
 )
 
 remote_instance = Turniere(
-    'https://api01.turnie.re', tournament_code, username, password
+    'https://backend.turnie.re', tournament_code, username, password
 )
 
 w = Worker(remote_instance)
