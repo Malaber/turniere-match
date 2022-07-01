@@ -6,7 +6,7 @@ from turniere import Turniere
 
 if __name__ == '__main__':
     #t = Turniere('https://api01.turnie.re', '', 'test@test.test', 'testtest')
-    t = Turniere('http://localhost:3001', '', 'test@test.test', 'testtesttest')
+    t = Turniere('http://localhost:4000', '', username, password)
     t.login()
 
     teams = []
@@ -24,9 +24,10 @@ if __name__ == '__main__':
         for team in group:
             teams_with_groups.append({
                 "name": team,
-                "group": group
+                "group": num
             })
 
+    print(teams_with_groups)
     t._request('/tournaments', method='POST', json={
         "name": "7. Beerpong Turnier",
         "description": "7. Beerpong Turnier von Beerpong Weinstraße",
