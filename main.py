@@ -50,6 +50,11 @@ def index():
             })
     return render_template('index.jinja2', stages=stages_simplified)
 
+@app.route('/teams')
+def teams():
+    teams = main_instance.get_teams()
+    return render_template('teams.jinja2', teams=teams)
+
 
 @app.route('/m/<sid>/next', methods=['POST'])
 def next_stage_matches(sid):
@@ -85,6 +90,13 @@ def stop_group_stage(sid):
     w.queue.put_nowait(Action('stop_group_stage', sid))
     return redirect('/')
 
+@app.route('/t/<tid>', methods=['POST'])
+def update_team_name(tid):
+    new_name = request.form['name']
+    main_instance.login()
+    main_instance.update_team_name(tid, new_name)
+    w.queue.put_nowait(Action('update_team_name', (tid, new_name)))
+    return redirect('/teams')
 
 if __name__ == '__main__':
     w.start()

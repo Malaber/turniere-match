@@ -100,3 +100,13 @@ class Turniere(object):
             self._request(f'/matches/{match.mid}', method='PATCH', json={
                 'state': 'finished'
             })
+
+    def get_teams(self):
+        return self._request(
+            f'/tournaments/{self.tournament_code}'
+        ).json()['teams']
+
+    def update_team_name(self, tid, name):
+        self._request(f'/teams/{tid}', method='PATCH', json={
+            'name': name
+        })

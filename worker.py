@@ -38,6 +38,9 @@ class Worker(Thread):
                     elif action.type == 'stop_group_stage':
                         self.instance.stop_group_stage(action.data)
                         break
+                    elif action.type == 'update_team_name':
+                        self.instance.update_team_name(action.data[0], action.data[1])
+                        break
                     else:
                         raise Exception('This shouldn\'t happen')
                 except Exception as e:
