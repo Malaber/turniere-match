@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11-alpine
 RUN apk add --no-cache build-base tzdata
 COPY . /app
 WORKDIR /app
