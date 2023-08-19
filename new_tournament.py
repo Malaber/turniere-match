@@ -20,6 +20,9 @@ if __name__ == '__main__':
     random.shuffle(teams)
     teams = teams[:128]
 
+    # import collections
+    # print([item for item, count in collections.Counter(teams).items() if count > 1])
+
     groups = zip(*([iter(teams)] * 4))
     teams_with_groups = []
     for num, group in enumerate(groups):
