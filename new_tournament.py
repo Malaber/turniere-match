@@ -4,6 +4,11 @@ import csv
 from config import read_config
 from turniere import Turniere
 
+"""
+Reads exported pretix csv, takes the first 128 teams and posts them to turniere backen locally.
+After tournament generation push db to remote instance
+"""
+
 
 config = read_config()
 
@@ -43,3 +48,9 @@ if __name__ == '__main__':
         "teams": teams_with_groups,
         "playoff_teams_amount": 64
     }))
+
+    infotext = "Push db to remote instance now!!"
+    print()
+    print(infotext)
+    print(infotext)
+    print(infotext)
