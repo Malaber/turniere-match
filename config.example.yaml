@@ -1,0 +1,5 @@
+username: 'username'
+password: 'password'
+tournament_code: '8'
+main_instance_url: 'http://localhost:3000'
+remote_instance_url: 'https://backend.turnie.re'

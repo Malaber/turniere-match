@@ -2,6 +2,7 @@ import logging
 
 from flask import Flask, redirect, render_template, request
 
+from config import read_config
 from turniere import Turniere
 from worker import Action, Match, Worker
 
@@ -10,16 +11,14 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'changeme(:'
 
-username = 'test@test.test'
-password = 'testtest'
+config = read_config()
 
-tournament_code = '13'
 main_instance = Turniere(
-    'http://localhost:3000', tournament_code, username, password
+    config.main_instance_url, config.tournament_code, config.username, config.password
 )
 
 remote_instance = Turniere(
-    'https://backend.turnie.re', tournament_code, username, password
+    config.remote_instance_url, config.tournament_code, config.username, config.password
 )
 
 w = Worker(remote_instance)

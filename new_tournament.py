@@ -1,12 +1,14 @@
 import random
 import csv
 
+from config import read_config
 from turniere import Turniere
 
 
+config = read_config()
+
 if __name__ == '__main__':
-    #t = Turniere('https://api01.turnie.re', '', 'test@test.test', 'testtest')
-    t = Turniere('http://localhost:4000', '', username, password)
+    t = Turniere(config.main_instance_url, '', config.username, config.password)
     t.login()
 
     teams = []
