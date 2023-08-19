@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  match:
+    image: turniere-match
+    restart: unless-stopped
+    volumes:
+      - ./config.yaml:/app/config.yaml
+    ports:
+      - 7070:7070
+    networks:
+      turniere_match:
+
+networks:
+  turniere_match:
+    external: true
