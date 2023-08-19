@@ -29,12 +29,14 @@ if __name__ == '__main__':
                 "group": num
             })
 
-    print(teams_with_groups)
-    t._request('/tournaments', method='POST', json={
+    for team_with_group in teams_with_groups:
+        print(team_with_group)
+
+    print(t._request('/tournaments', method='POST', json={
         "name": "7. Beerpong Turnier",
         "description": "7. Beerpong Turnier von Beerpong Weinstraße",
         "public": True,
         "group_stage": True,
         "teams": teams_with_groups,
         "playoff_teams_amount": 64
-    })
+    }))
