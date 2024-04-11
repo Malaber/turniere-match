@@ -1,0 +1,11 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  DOCKER_IMAGE_ENVS: "production"
+
+include:
+  - project: 'turniere/turniere-infra'
+    file: '/ci/pipeline.yaml'
