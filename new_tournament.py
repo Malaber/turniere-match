@@ -17,7 +17,7 @@ if __name__ == '__main__':
     t.login()
 
     teams = []
-    with open('t7_checkin.csv', newline='') as csvfile:
+    with open('t9_checkin.csv', newline='') as csvfile:
         turniere_checkin_csv = csv.DictReader(csvfile, delimiter=',')
         for row in turniere_checkin_csv:
             teams.append(row['Team Name'])
