@@ -2,7 +2,7 @@ import logging
 
 from flask import Flask, redirect, render_template, request
 
-from config import read_config
+from config import read_config, MatchConfiguredToNotRunError
 from turniere import Turniere
 from worker import Action, Match, Worker
 
@@ -11,7 +11,12 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'changeme(:'
 
-config = read_config()
+try:
+    config = read_config()
+except MatchConfiguredToNotRunError:
+    print("Match is configured to not run. Exiting.")
+    exit(0)
+
 
 main_instance = Turniere(
     config.main_instance_url, config.tournament_code, config.username, config.password
