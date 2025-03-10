@@ -133,3 +133,13 @@ class Turniere(object):
         self._request(f'/tournaments/{self.tournament_code}/set_timer_end', method='PATCH', json={
             'timer_end': timer_end
         })
+
+    def set_timer_end_seconds(self, timer_end_seconds):
+        # Validate timer_end_seconds
+        if not isinstance(timer_end_seconds, int) or timer_end_seconds <= 0:
+            raise ValueError('Timer end seconds must be a positive integer')
+
+        # Send PATCH request with timer_end_seconds
+        self._request(f'/tournaments/{self.tournament_code}/set_timer_end', method='PATCH', json={
+            'timer_end_seconds': timer_end_seconds
+        })

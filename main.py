@@ -114,6 +114,18 @@ def set_timer():
         return redirect('/?error=invalid_time')
     return redirect('/')
 
+@app.route('/set_timer_seconds', methods=['POST'])
+def set_timer_seconds():
+    timer_end_seconds = request.form['timer_end_seconds']
+    main_instance.login()
+    try:
+        timer_end_seconds = int(timer_end_seconds)
+        main_instance.set_timer_end_seconds(timer_end_seconds)
+    except ValueError as e:
+        logging.error(f"Failed to set timer in seconds: {e}")
+        return redirect('/?error=invalid_seconds')
+    return redirect('/')
+
 if __name__ == '__main__':
     w.start()
     app.run(host='0.0.0.0', port=7070, debug=True)
