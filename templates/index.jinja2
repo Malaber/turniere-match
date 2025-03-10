@@ -17,6 +17,16 @@
 </head>
 
 <body>
+    <!-- Timer -->
+    <h1>Timer</h1>
+    <p>Current Timer End: {{ timer }}</p>
+    <form class="pure-form" action="{{ url_for('set_timer') }}" method="POST">
+        <fieldset>
+            <label for="end_time">New End Time:</label>
+            <input type="datetime-local" id="end_time" name="end_time" required>
+            <button type="submit" class="pure-button pure-button-primary">Set Timer</button>
+        </fieldset>
+    </form>
     <!-- Matches -->
     {% for stage in stages %}
     {% set sid = stage['level'] %}

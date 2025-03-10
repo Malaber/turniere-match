@@ -1,5 +1,5 @@
 import logging
-
+import datetime
 import requests
 
 
@@ -109,4 +109,27 @@ class Turniere(object):
     def update_team_name(self, tid, name):
         self._request(f'/teams/{tid}', method='PATCH', json={
             'name': name
+        })
+
+    def get_timer_end(self):
+        json = self._request(f'/tournaments/{self.tournament_code}/timer_end').json()
+        return json['timer_end']
+
+    def set_timer_end(self, timer_end):
+        # Validate timer_end
+        if not timer_end:
+            raise ValueError('Timer end is required')
+
+        try:
+            parsed_time = datetime.datetime.strptime(timer_end, '%Y-%m-%dT%H:%M')
+            if parsed_time is None:
+                raise ValueError('Invalid datetime format')
+            if parsed_time <= datetime.datetime.now():
+                raise ValueError('Timer end must be in the future')
+        except ValueError as e:
+            raise ValueError(f'Invalid datetime format: {e}')
+
+        # Send PATCH request
+        self._request(f'/tournaments/{self.tournament_code}/set_timer_end', method='PATCH', json={
+            'timer_end': timer_end
         })

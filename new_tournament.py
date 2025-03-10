@@ -41,8 +41,8 @@ if __name__ == '__main__':
         print(team_with_group)
 
     print(t._request('/tournaments', method='POST', json={
-        "name": "7. Beerpong Turnier",
-        "description": "7. Beerpong Turnier von Beerpong Weinstraße",
+        "name": "TEST 9",
+        "description": "Diese matchups sind nicht korrekt, nur ein Test",
         "public": True,
         "group_stage": True,
         "teams": teams_with_groups,
