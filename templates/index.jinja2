@@ -10,83 +10,83 @@
     <!--<script src="{{ url_for('static', filename='socket.io.js') }}"></script>-->
     <style>
         .main-table {
-          border-width: 0 !important;
-          width: 100%;
+            border-width: 0 !important;
+            width: 100%;
         }
     </style>
 </head>
 
 <body>
-    <!-- Matches -->
-    {% for stage in stages %}
+{% include 'timer.jinja2' %}
+<!-- Matches -->
+{% for stage in stages %}
     {% set sid = stage['level'] %}
     <h1>
         {% if stage.group %}
-        Gruppe {{ sid }}
+            Gruppe {{ sid }}
         {% else %}
-        Stage {{ sid + 1 }}
         {% endif %}
         {% if not stage.group or loop.first %}
-        <form class="pure-form" action="{{ url_for('next_stage_matches', sid='group' if stage.group else stage['id']) }}" method="POST">
-            <fieldset>
-                <label for="sure-{{ sid }}">
-                    <input id="sure-{{ sid }}" type="checkbox" required> Sicher?
-                </label>
-                <label for="sure2-{{ sid }}">
-                    <input id="sure2-{{ sid }}" type="checkbox" required> Sicher?
-                </label>
-                <button type="submit" class="pure-button pure-button-primary">Nächste Matches starten</button>
-            </fieldset>
-        </form>
-        {% if stage.group %}
-        <form class="pure-form" action="{{ url_for('stop_group_stage', sid=stage['id']) }}" method="POST">
-            <fieldset>
-                <label for="sure3-{{ sid }}">
-                    <input id="sure3-{{ sid }}" type="checkbox" required> Sicher?
-                </label>
-                <button type="submit" class="pure-button pure-button-primary">Gruppenphase beenden</button>
-            </fieldset>
-        </form>
-        {% endif %}
+            <form class="pure-form" action="{{ url_for('next_stage_matches', sid='group' if stage.group else stage['id']) }}" method="POST">
+                <fieldset>
+                    <label for="sure-{{ sid }}">
+                        <input id="sure-{{ sid }}" type="checkbox" required> Sicher?
+                    </label>
+                    <label for="sure2-{{ sid }}">
+                        <input id="sure2-{{ sid }}" type="checkbox" required> Sicher?
+                    </label>
+                    <button type="submit" class="pure-button pure-button-primary">Nächste Matches starten</button>
+                </fieldset>
+            </form>
+            {% if stage.group %}
+                <form class="pure-form" action="{{ url_for('stop_group_stage', sid=stage['id']) }}" method="POST">
+                    <fieldset>
+                        <label for="sure3-{{ sid }}">
+                            <input id="sure3-{{ sid }}" type="checkbox" required> Sicher?
+                        </label>
+                        <button type="submit" class="pure-button pure-button-primary">Gruppenphase beenden</button>
+                    </fieldset>
+                </form>
+            {% endif %}
         {% endif %}
     </h1>
     <table class="pure-table main-table">
         <tr>
             {% for match in stage.matches %}
-            {% set matchscores = match['match_scores']|sort(attribute='id') %}
-            {% set matchscore1 = matchscores[0] %}
-            {% set matchscore2 = matchscores[1] %}
-            {% set name1 = matchscore1['team']['name'] %}
-            {% set name2 = matchscore2['team']['name'] %}
-            {% set score1 = matchscore1['points'] %}
-            {% set score2 = matchscore2['points'] %}
-            <td style="background-color: {% if match.state == 'not_started' %}gray{% elif match.state == 'in_progress' %}yellow{% else %}lime{% endif %}">
-                <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}"
-                    method="POST" id="match-{{ match.id }}">
-                    <input type="hidden" name="matchscore1" value="{{ matchscore1['id'] }}">
-                    <input type="hidden" name="matchscore2" value="{{ matchscore2['id'] }}">
-                    <fieldset>
-                        <label for="score1-{{ match.id }}">{{ name1 }}</label>
-                        <input name="score1" id="score1-{{ match.id }}" type="number" value="{{ score1 }}">
+                {% set matchscores = match['match_scores']|sort(attribute='id') %}
+                {% set matchscore1 = matchscores[0] %}
+                {% set matchscore2 = matchscores[1] %}
+                {% set name1 = matchscore1['team']['name'] %}
+                {% set name2 = matchscore2['team']['name'] %}
+                {% set score1 = matchscore1['points'] %}
+                {% set score2 = matchscore2['points'] %}
+                <td style="background-color: {% if match.state == 'not_started' %}gray{% elif match.state == 'in_progress' %}yellow{% else %}lime{% endif %}">
+                    <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}"
+                          method="POST" id="match-{{ match.id }}">
+                        <input type="hidden" name="matchscore1" value="{{ matchscore1['id'] }}">
+                        <input type="hidden" name="matchscore2" value="{{ matchscore2['id'] }}">
+                        <fieldset>
+                            <label for="score1-{{ match.id }}">{{ name1 }}</label>
+                            <input name="score1" id="score1-{{ match.id }}" type="number" value="{{ score1 }}">
 
-                        <label for="score2-{{ match.id }}">{{ name2 }}</label>
-                        <input name="score2" id="score2-{{ match.id }}" type="number" value="{{ score2 }}">
+                            <label for="score2-{{ match.id }}">{{ name2 }}</label>
+                            <input name="score2" id="score2-{{ match.id }}" type="number" value="{{ score2 }}">
 
-                        <label for="isLive-{{ match.id }}" class="pure-checkbox">
-                            Live <input name="isLive" id="isLive-{{ match.id }}" type="checkbox" {% if match.state == 'in_progress' %}checked{% endif %}>
-                        </label>
-                        <button type="submit" class="pure-button pure-button-primary" {% if match.state != 'in_progress' %}disabled{% endif %}>Abschicken</button>
-                    </fieldset>
-                </form>
-            </td>
-            {% if (loop.index % 6) == 0 %}</tr>
-        <tr>{% endif %}
+                            <label for="isLive-{{ match.id }}" class="pure-checkbox">
+                                Live <input name="isLive" id="isLive-{{ match.id }}" type="checkbox" {% if match.state == 'in_progress' %}checked{% endif %}>
+                            </label>
+                            <button type="submit" class="pure-button pure-button-primary" {% if match.state != 'in_progress' %}disabled{% endif %}>Abschicken</button>
+                        </fieldset>
+                    </form>
+                </td>
+                {% if (loop.index % 6) == 0 %}</tr>
+                    <tr>{% endif %}
             {% endfor %}
-        </tr>
+            </tr>
     </table>
-    {% endfor %}
+{% endfor %}
 
-    <script src="{{ url_for('static', filename='main.js') }}"></script>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 
 </html>

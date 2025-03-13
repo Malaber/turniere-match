@@ -17,7 +17,7 @@ if __name__ == '__main__':
     t.login()
 
     teams = []
-    with open('t7_checkin.csv', newline='') as csvfile:
+    with open('t9_checkin.csv', newline='') as csvfile:
         turniere_checkin_csv = csv.DictReader(csvfile, delimiter=',')
         for row in turniere_checkin_csv:
             teams.append(row['Team Name'])
@@ -41,8 +41,8 @@ if __name__ == '__main__':
         print(team_with_group)
 
     print(t._request('/tournaments', method='POST', json={
-        "name": "7. Beerpong Turnier",
-        "description": "7. Beerpong Turnier von Beerpong Weinstraße",
+        "name": "TEST 9",
+        "description": "Diese matchups sind nicht korrekt, nur ein Test",
         "public": True,
         "group_stage": True,
         "teams": teams_with_groups,

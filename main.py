@@ -31,6 +31,7 @@ w = Worker(remote_instance)
 
 @app.route('/')
 def index():
+    timer = main_instance.get_timer_end()
     stages = main_instance.get_stages()
     stages_simplified = []
     for stage in stages:
@@ -52,7 +53,7 @@ def index():
                     lambda m: m['state'] != 'not_ready', stage['matches']
                 ), key=lambda m: m['position']),
             })
-    return render_template('index.jinja2', stages=stages_simplified)
+    return render_template('index.jinja2', stages=stages_simplified, timer=timer)
 
 @app.route('/teams')
 def teams():
@@ -101,6 +102,31 @@ def update_team_name(tid):
     main_instance.update_team_name(tid, new_name)
     w.queue.put_nowait(Action('update_team_name', (tid, new_name)))
     return redirect('/teams')
+
+@app.route('/set_timer', methods=['POST'])
+def set_timer():
+    end_time = request.form['end_time']
+    main_instance.login()
+    try:
+        main_instance.set_timer_end(end_time)
+        w.queue.put_nowait(Action('set_timer_end', end_time))
+    except ValueError as e:
+        logging.error(f"Failed to set timer: {e}")
+        return redirect('/?error=invalid_time')
+    return redirect('/')
+
+@app.route('/set_timer_seconds', methods=['POST'])
+def set_timer_seconds():
+    timer_end_seconds = request.form['timer_end_seconds']
+    main_instance.login()
+    try:
+        timer_end_seconds = int(timer_end_seconds)
+        main_instance.set_timer_end_seconds(timer_end_seconds)
+        w.queue.put_nowait(Action('set_timer_end_seconds', timer_end_seconds))
+    except ValueError as e:
+        logging.error(f"Failed to set timer in seconds: {e}")
+        return redirect('/?error=invalid_seconds')
+    return redirect('/')
 
 if __name__ == '__main__':
     w.start()
