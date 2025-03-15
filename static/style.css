@@ -30,7 +30,7 @@
     width: 250px; /* Adjust width as needed */
 }
 
-.navbar button {
+.navbar__delete-button {
     position: absolute;
     right: 10px;
     background: none;
