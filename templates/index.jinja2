@@ -57,119 +57,108 @@
 <hr>
 <!-- Matches -->
 {% for stage in stages %}
-    {% set sid = stage['level'] %}
-    {% if not stage.group or loop.first %}
-        <form class="pure-form" action="{{ url_for('next_stage_matches', sid='group' if stage.group else stage['id']) }}" method="POST">
-            <fieldset>
-                <label for="sure-{{ sid }}">
-                    <input id="sure-{{ sid }}" type="checkbox" required> Sicher?
-                </label>
-                <label for="sure2-{{ sid }}">
-                    <input id="sure2-{{ sid }}" type="checkbox" required> Sicher?
-                </label>
-                <button type="submit" class="pure-button pure-button-primary">Nächste Matches starten</button>
-            </fieldset>
-        </form>
-        {% if stage.group %}
-            <form class="pure-form" action="{{ url_for('stop_group_stage', sid=stage['id']) }}" method="POST">
+    <div class="stage">
+        {% set sid = stage['level'] %}
+        {% if not stage.group or loop.first %}
+            <form class="pure-form" action="{{ url_for('next_stage_matches', sid='group' if stage.group else stage['id']) }}" method="POST">
                 <fieldset>
-                    <label for="sure3-{{ sid }}">
-                        <input id="sure3-{{ sid }}" type="checkbox" required> Sicher?
+                    <label for="sure-{{ sid }}">
+                        <input id="sure-{{ sid }}" type="checkbox" required> Sicher?
                     </label>
-                    <button type="submit" class="pure-button pure-button-primary">Gruppenphase beenden</button>
+                    <label for="sure2-{{ sid }}">
+                        <input id="sure2-{{ sid }}" type="checkbox" required> Sicher?
+                    </label>
+                    <button type="submit" class="pure-button pure-button-primary">Nächste Matches starten</button>
                 </fieldset>
             </form>
+            {% if stage.group %}
+                <form class="pure-form" action="{{ url_for('stop_group_stage', sid=stage['id']) }}" method="POST">
+                    <fieldset>
+                        <label for="sure3-{{ sid }}">
+                            <input id="sure3-{{ sid }}" type="checkbox" required> Sicher?
+                        </label>
+                        <button type="submit" class="pure-button pure-button-primary">Gruppenphase beenden</button>
+                    </fieldset>
+                </form>
+            {% endif %}
         {% endif %}
-    {% endif %}
-    <h1>
-        {% if stage.group %}
-            Gruppe {{ sid }}
+        <h1>
+            {% if stage.group %}
+                Gruppe {{ sid }}
+            {% endif %}
+        </h1>
+        <table class="pure-table main-table">
+            <tr>
+                {% for match in stage.matches %}
+                    {% set matchscores = match['match_scores']|sort(attribute='id') %}
+                    {% set matchscore1 = matchscores[0] %}
+                    {% set matchscore2 = matchscores[1] %}
+                    {% set name1 = matchscore1['team']['name'] %}
+                    {% set name2 = matchscore2['team']['name'] %}
+                    {% set score1 = matchscore1['points'] %}
+                    {% set score2 = matchscore2['points'] %}
+                    <td class="team-row" data-tags="{{ name1 }},{{ name2 }},Gruppe {{ sid }}" style="background-color: {% if match.state == 'not_started' %}gray{% elif match.state == 'in_progress' %}yellow{% else %}lime{% endif %}">
+                        <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}" method="POST" id="match-{{ match.id }}">
+                            <input type="hidden" name="matchscore1" value="{{ matchscore1['id'] }}">
+                            <input type="hidden" name="matchscore2" value="{{ matchscore2['id'] }}">
+                            <fieldset>
+                                <label for="score1-{{ match.id }}">{{ name1 }}</label>
+                                <input name="score1" id="score1-{{ match.id }}" type="number" value="{{ score1 }}">
+
+                                <label for="score2-{{ match.id }}">{{ name2 }}</label>
+                                <input name="score2" id="score2-{{ match.id }}" type="number" value="{{ score2 }}">
+
+                                <label for="isLive-{{ match.id }}" class="pure-checkbox">
+                                    Live <input name="isLive" id="isLive-{{ match.id }}" type="checkbox" {% if match.state == 'in_progress' %}checked{% endif %}>
+                                </label>
+                                {% if match.state == 'in_progress' %}
+                                    <button type="submit" class="pure-button pure-button-primary">Speichern</button>
+                                {% else %}
+                                    <details>
+                                        <summary>Match is locked</summary>
+                                        <button type="submit" class="pure-button button-error" disabled>OVERRIDE</button>
+                                    </details>
+                                {% endif %}
+                            </fieldset>
+                        </form>
+                    </td>
+                    {% if (loop.index % 6) == 0 %}</tr>
+                        <tr>{% endif %}
+                {% endfor %}
+                </tr>
+        </table>
+        {% if not loop.last %}
+            <hr>
         {% endif %}
-    </h1>
-    <table class="pure-table main-table">
-        <tr>
-            {% for match in stage.matches %}
-                {% set matchscores = match['match_scores']|sort(attribute='id') %}
-                {% set matchscore1 = matchscores[0] %}
-                {% set matchscore2 = matchscores[1] %}
-                {% set name1 = matchscore1['team']['name'] %}
-                {% set name2 = matchscore2['team']['name'] %}
-                {% set score1 = matchscore1['points'] %}
-                {% set score2 = matchscore2['points'] %}
-                <td class="team-row" data-tags="{{ name1 }},{{ name2 }},Gruppe {{ sid }}" style="background-color: {% if match.state == 'not_started' %}gray{% elif match.state == 'in_progress' %}yellow{% else %}lime{% endif %}">
-                    <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}" method="POST" id="match-{{ match.id }}">
-                        <input type="hidden" name="matchscore1" value="{{ matchscore1['id'] }}">
-                        <input type="hidden" name="matchscore2" value="{{ matchscore2['id'] }}">
-                        <fieldset>
-                            <label for="score1-{{ match.id }}">{{ name1 }}</label>
-                            <input name="score1" id="score1-{{ match.id }}" type="number" value="{{ score1 }}">
-
-                            <label for="score2-{{ match.id }}">{{ name2 }}</label>
-                            <input name="score2" id="score2-{{ match.id }}" type="number" value="{{ score2 }}">
-
-                            <label for="isLive-{{ match.id }}" class="pure-checkbox">
-                                Live <input name="isLive" id="isLive-{{ match.id }}" type="checkbox" {% if match.state == 'in_progress' %}checked{% endif %}>
-                            </label>
-                            {% if match.state == 'in_progress' %}
-                                <button type="submit" class="pure-button pure-button-primary">Speichern</button>
-                            {% else %}
-                                <details>
-                                    <summary>Match is locked</summary>
-                                    <button type="submit" class="pure-button button-error" disabled>OVERRIDE</button>
-                                </details>
-                            {% endif %}
-                        </fieldset>
-                    </form>
-                </td>
-                {% if (loop.index % 6) == 0 %}</tr>
-                    <tr>{% endif %}
-            {% endfor %}
-            </tr>
-    </table>
-    {% if not loop.last %}
-        <hr>
-    {% endif %}
+    </div>
 {% endfor %}
 
 <script>
     function filterTeams() {
-        let input, filter, table, i, txtValue, groups, group, matches, matchVisible;
-        input = document.getElementById("teamSearch");
-        filter = input.value.toUpperCase();
-        table = document.querySelectorAll(".team-row");
-        groups = document.querySelectorAll("h1");
+        const input = document.getElementById("teamSearch");
+        const filter = input.value.toUpperCase();
+        const stages = document.querySelectorAll(".stage");
 
-        for (i = 0; i < table.length; i++) {
-            txtValue = table[i].getAttribute("data-tags");
-            if (txtValue) {
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    table[i].style.display = "";
+        stages.forEach(stage => {
+            const teamRows = stage.querySelectorAll(".team-row");
+            let allHidden = true;
+
+            teamRows.forEach(row => {
+                const txtValue = row.getAttribute("data-tags");
+                if (txtValue && txtValue.toUpperCase().indexOf(filter) > -1) {
+                    row.style.display = "";
+                    allHidden = false;
                 } else {
-                    table[i].style.display = "none";
+                    row.style.display = "none";
                 }
-            }
-        }
+            });
 
-        for (i = 0; i < groups.length; i++) {
-            group = groups[i];
-            matches = group.nextElementSibling.querySelectorAll(".team-row");
-            matchVisible = false;
-
-            for (var j = 0; j < matches.length; j++) {
-                if (matches[j].style.display !== "none") {
-                    matchVisible = true;
-                    break;
-                }
-            }
-
-            if (matchVisible) {
-                group.style.display = "";
-                group.nextElementSibling.style.display = "";
+            if (allHidden) {
+                stage.style.display = "none";
             } else {
-                group.style.display = "none";
-                group.nextElementSibling.style.display = "none";
+                stage.style.display = "";
             }
-        }
+        });
     }
 </script>
 <script src="{{ url_for('static', filename='main.js') }}"></script>
