@@ -42,7 +42,9 @@
             const distance = endTime - now;
 
             if (distance < 0) {
-                document.getElementById('timer').innerText = "EXPIRED";
+                timerEndText = "SPIEL BEENDET"
+                document.getElementById('timer').innerText = timerEndText;
+                document.getElementById('navbarTimer').innerText = timerEndText;
                 clearInterval(timerInterval);
                 return;
             }
@@ -50,8 +52,11 @@
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            const hours_optional = hours? `${hours}h `: '';
 
-            document.getElementById('timer').innerText = `${hours}h ${minutes}m ${seconds}s`;
+            const timerText = `${hours_optional}${minutes}m ${seconds}s`;
+            document.getElementById('timer').innerText = timerText;
+            document.getElementById('navbarTimer').innerText = timerText;
         }
 
         updateTimer();
