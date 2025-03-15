@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from flask import Flask, redirect, render_template, request
 

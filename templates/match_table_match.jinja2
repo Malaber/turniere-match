@@ -1,0 +1,38 @@
+{% set matchscores = match['match_scores']|sort(attribute='id') %}
+{% set matchscore1 = matchscores[0] %}
+{% set matchscore2 = matchscores[1] %}
+{% set name1 = matchscore1['team']['name'] %}
+{% set name2 = matchscore2['team']['name'] %}
+{% set score1 = matchscore1['points'] %}
+{% set score2 = matchscore2['points'] %}
+{% set tischNum = match.position + 1 %}
+{% set tischId = "Gruppe {}".format(sid) if stage.group else "Tisch {}".format(tischNum) %}
+{% set nextTischId = "Tisch {}".format(((tischNum) // 2) + (tischNum % 2)) if not stage.group %}
+<td class="team-row" data-tags="{{ name1 }},{{ name2 }},{{ tischId }}" style="background-color: {% if match.state == 'not_started' %}gray{% elif match.state == 'in_progress' %}gold{% else %}limegreen{% endif %}">
+    <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}" method="POST" id="match-{{ match.id }}">
+        <input type="hidden" name="matchscore1" value="{{ matchscore1['id'] }}">
+        <input type="hidden" name="matchscore2" value="{{ matchscore2['id'] }}">
+        <fieldset>
+            <label for="score1-{{ match.id }}">{{ name1 }}</label>
+            <input name="score1" id="score1-{{ match.id }}" type="number" value="{{ score1 }}">
+
+            <label for="score2-{{ match.id }}">{{ name2 }}</label>
+            <input name="score2" id="score2-{{ match.id }}" type="number" value="{{ score2 }}">
+
+            <label for="isLive-{{ match.id }}" class="pure-checkbox">
+                Live <input name="isLive" id="isLive-{{ match.id }}" type="checkbox" {% if match.state == 'in_progress' %}checked{% endif %}>
+            </label>
+            {% if match.state == 'in_progress' %}
+                <button type="submit" class="pure-button pure-button-primary">Speichern</button>
+            {% else %}
+                <details>
+                    <summary>Match is locked</summary>
+                    <button type="submit" class="pure-button button-error" disabled>OVERRIDE</button>
+                </details>
+            {% endif %}
+        </fieldset>
+        {% if not stage.group %}
+            {{ tischId }} ➤ {{ nextTischId }}
+        {% endif %}
+    </form>
+</td>

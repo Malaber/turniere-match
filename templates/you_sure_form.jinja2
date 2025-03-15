@@ -1,0 +1,8 @@
+<form class="pure-form" action="{{ url }}" method="POST">
+    <fieldset>
+        <label>
+            <input type="checkbox" required> Sicher?
+        </label>
+        <button type="submit" class="pure-button pure-button-primary">{{ button_text }} ({% if not stage.group %}{{ 2**stage["level"] }}tel{% else %}Gruppenphase{% endif %})</button>
+    </fieldset>
+</form>
