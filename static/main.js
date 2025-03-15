@@ -24,3 +24,16 @@ function filterTeams() {
         }
     });
 }
+
+// Focus search input on page load
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('teamSearch').focus();
+});
+
+// Shortcut to focus search input with cmd/ctrl + k
+document.addEventListener('keydown', function(event) {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault();
+        document.getElementById('teamSearch').focus();
+    }
+});
