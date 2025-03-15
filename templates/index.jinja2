@@ -8,45 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='pure.css') }}" integrity="sha256-fPXvMqJjeydW056U7AUM/dp5L+sRz0xPK0Mx3p20nkI=">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!--<script src="{{ url_for('static', filename='socket.io.js') }}"></script>-->
-    <style>
-        .main-table {
-            border-width: 0 !important;
-            width: 100%;
-        }
-        .navbar {
-            overflow: hidden;
-            background-color: #333;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .navbar input[type="text"] {
-            float: right;
-            padding: 6px;
-            margin: 8px;
-            border: none;
-            width: 200px; /* Adjust width as needed */
-        }
-
-        body {
-            padding-top: 50px;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .navbar input[type="text"] {
-                width: 100px; /* Adjust width for smaller screens */
-                margin: 8px 4px; /* Adjust margin for smaller screens */
-            }
-
-            body {
-                padding-top: 60px; /* Adjust padding for smaller screens */
-            }
-        }
-    </style>
 </head>
 
 <body>
