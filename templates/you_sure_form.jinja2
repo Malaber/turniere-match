@@ -1,8 +1,15 @@
+{% set unique_id = get_uuid() %}
 <form class="pure-form" action="{{ url }}" method="POST">
     <fieldset>
         <label>
-            <input type="checkbox" required> Sicher?
+            <input type="checkbox" id="sureCheckbox-{{ unique_id }}" required> Sicher?
         </label>
-        <button type="submit" class="pure-button pure-button-primary">{{ button_text }} ({% if stage.group %}{{ "Gruppenphase" }}{% else %}{{ stage.name }}{% endif %})</button>
+        <button type="submit" class="pure-button pure-button-primary" id="submitButton-{{ unique_id }}" disabled>{{ button_text }} ({% if stage.group %}{{ "Gruppenphase" }}{% else %}{{ stage.name }}{% endif %})</button>
     </fieldset>
 </form>
+
+<script>
+    document.getElementById('sureCheckbox-{{ unique_id }}').addEventListener('change', function() {
+        document.getElementById('submitButton-{{ unique_id }}').disabled = !this.checked;
+    });
+</script>

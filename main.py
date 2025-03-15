@@ -12,12 +12,16 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'changeme(:'
 
+def get_uuid():
+    return str(uuid.uuid4())
+
 try:
     config = read_config()
 except MatchConfiguredToNotRunError:
     print("Match is configured to not run. Exiting.")
     exit(0)
 
+app.jinja_env.globals.update(get_uuid=get_uuid)
 
 main_instance = Turniere(
     config.main_instance_url, config.tournament_code, config.username, config.password
