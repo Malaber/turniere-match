@@ -38,9 +38,7 @@
     <div class="stage">
         {% set sid = stage['level'] %}
         <h1>
-            {% if stage.group %}
-                Gruppe {{ sid }}
-            {% endif %}
+            {{ stage.name }}
         </h1>
         <table class="pure-table pure-table-bordered main-table">
             <tr>

@@ -30,6 +30,18 @@ remote_instance = Turniere(
 w = Worker(remote_instance)
 
 
+def get_stage_name(sid):
+    if sid == 0:
+        return 'Finale'
+    elif sid == 1:
+        return 'Halbfinale'
+    elif sid == 2:
+        return 'Viertelfinale'
+    elif sid == 3:
+        return 'Achtelfinale'
+    else:
+        return f'{2 ** sid}tel-Finale'
+
 @app.route('/')
 def index():
     timer = main_instance.get_timer_end()
@@ -44,6 +56,7 @@ def index():
                     'group': True,
                     'level': group['number'],
                     'matches': sorted(group['matches'], key=lambda m: m['position']),
+                    'name': "Gruppe " + str(group['number']),
                 })
         else:
             stages_simplified.append({
@@ -53,6 +66,7 @@ def index():
                 'matches': sorted(filter(
                     lambda m: m['state'] != 'not_ready', stage['matches']
                 ), key=lambda m: m['position']),
+                'name': get_stage_name(stage['level']),
             })
     return render_template('index.jinja2', stages=stages_simplified, timer=timer)
 

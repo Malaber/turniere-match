@@ -3,6 +3,6 @@
         <label>
             <input type="checkbox" required> Sicher?
         </label>
-        <button type="submit" class="pure-button pure-button-primary">{{ button_text }} ({% if not stage.group %}{{ 2**stage["level"] }}tel{% else %}Gruppenphase{% endif %})</button>
+        <button type="submit" class="pure-button pure-button-primary">{{ button_text }} ({% if stage.group %}{{ "Gruppenphase" }}{% else %}{{ stage.name }}{% endif %})</button>
     </fieldset>
 </form>
