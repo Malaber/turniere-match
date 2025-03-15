@@ -17,6 +17,14 @@
     justify-content: space-between;
     background-color: #333;
     padding: 0 16px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Ensure it stays above other content */
+}
+
+body {
+    margin-top: 50px; /* Move body down because of the navbar */
 }
 
 .navbar__title {
@@ -35,6 +43,7 @@
     position: relative;
     display: flex;
     align-items: center;
+    padding-right: 20px;
 }
 
 .navbar input[type="text"] {
@@ -46,7 +55,7 @@
 
 .navbar__delete-button {
     position: absolute;
-    right: 10px;
+    right: 30px;
     background: none;
     border: none;
     color: #333;
