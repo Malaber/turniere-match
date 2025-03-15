@@ -30,6 +30,7 @@ body {
 .navbar__title {
     color: white;
     margin: 0;
+    display: block;
 }
 
 .navbar__timer {
@@ -61,4 +62,15 @@ body {
     color: #333;
     font-size: 16px;
     cursor: pointer;
+}
+
+/* Styles for smaller screens */
+@media (max-width: 768px) {
+    .navbar__title {
+        display: none;
+    }
+
+    .navbar__timer {
+        text-align: left;
+    }
 }
