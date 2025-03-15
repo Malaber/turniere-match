@@ -1,6 +1,7 @@
 function filterTeams() {
     const input = document.getElementById("teamSearch");
     const filter = input.value.toUpperCase();
+    localStorage.setItem('teamSearch', input.value); // Save the search term to localStorage
     const stages = document.querySelectorAll(".stage");
 
     stages.forEach(stage => {
@@ -25,9 +26,15 @@ function filterTeams() {
     });
 }
 
-// Focus search input on page load
+// Focus search input on page load and restore the search term
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('teamSearch').focus();
+    const searchInput = document.getElementById('teamSearch');
+    const savedSearch = localStorage.getItem('teamSearch');
+    if (savedSearch) {
+        searchInput.value = savedSearch;
+        filterTeams(); // Apply the filter with the saved search term
+    }
+    searchInput.focus();
 });
 
 // Shortcut to focus search input with cmd/ctrl + k
