@@ -149,6 +149,27 @@
                 }
             }
         }
+
+        for (i = 0; i < groups.length; i++) {
+            group = groups[i];
+            matches = group.nextElementSibling.querySelectorAll(".team-row");
+            matchVisible = false;
+
+            for (var j = 0; j < matches.length; j++) {
+                if (matches[j].style.display !== "none") {
+                    matchVisible = true;
+                    break;
+                }
+            }
+
+            if (matchVisible) {
+                group.style.display = "";
+                group.nextElementSibling.style.display = "";
+            } else {
+                group.style.display = "none";
+                group.nextElementSibling.style.display = "none";
+            }
+        }
     }
 </script>
 <script src="{{ url_for('static', filename='main.js') }}"></script>
