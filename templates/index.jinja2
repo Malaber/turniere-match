@@ -22,7 +22,7 @@
 {% include 'timer.jinja2' %}
 <hr>
 {% for stage in stages %}
-    {% if not stage.group or loop.first %}
+    {% if not stage.group or loop.first %} {# stages is an array of all groups and stages, this runs once for the group stage and once for every playoff stage #}
         {% with url=url_for('next_stage_matches', sid='group' if stage.group else stage['id']), button_text="Nächste Matches starten" %}
             {% include "you_sure_form.jinja2" %}
         {% endwith %}
