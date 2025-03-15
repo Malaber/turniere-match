@@ -7,6 +7,7 @@
     <title>Turnie.re Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='pure.css') }}" integrity="sha256-fPXvMqJjeydW056U7AUM/dp5L+sRz0xPK0Mx3p20nkI=">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!--<script src="{{ url_for('static', filename='socket.io.js') }}"></script>-->
     <style>
         .main-table {
@@ -75,7 +76,14 @@
                             <label for="isLive-{{ match.id }}" class="pure-checkbox">
                                 Live <input name="isLive" id="isLive-{{ match.id }}" type="checkbox" {% if match.state == 'in_progress' %}checked{% endif %}>
                             </label>
-                            <button type="submit" class="pure-button pure-button-primary" {% if match.state != 'in_progress' %}disabled{% endif %}>Abschicken</button>
+                            {% if match.state == 'in_progress' %}
+                                <button type="submit" class="pure-button pure-button-primary">Speichern</button>
+                            {% else %}
+                                <details>
+                                    <summary>Match is locked</summary>
+                                    <button type="submit" class="pure-button button-error" disabled>OVERRIDE</button>
+                                </details>
+                            {% endif %}
                         </fieldset>
                     </form>
                 </td>
@@ -84,6 +92,9 @@
             {% endfor %}
             </tr>
     </table>
+    {% if not loop.last %}
+        <hr>
+    {% endif %}
 {% endfor %}
 
 <script src="{{ url_for('static', filename='main.js') }}"></script>
