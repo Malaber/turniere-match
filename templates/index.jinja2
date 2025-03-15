@@ -96,9 +96,8 @@
                 {% set name2 = matchscore2['team']['name'] %}
                 {% set score1 = matchscore1['points'] %}
                 {% set score2 = matchscore2['points'] %}
-                <td class="team-row" style="background-color: {% if match.state == 'not_started' %}gray{% elif match.state == 'in_progress' %}yellow{% else %}lime{% endif %}">
-                    <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}"
-                          method="POST" id="match-{{ match.id }}">
+                <td class="team-row" data-tags="{{ name1 }},{{ name2 }},Gruppe {{ sid }}" style="background-color: {% if match.state == 'not_started' %}gray{% elif match.state == 'in_progress' %}yellow{% else %}lime{% endif %}">
+                    <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}" method="POST" id="match-{{ match.id }}">
                         <input type="hidden" name="matchscore1" value="{{ matchscore1['id'] }}">
                         <input type="hidden" name="matchscore2" value="{{ matchscore2['id'] }}">
                         <fieldset>
@@ -134,14 +133,15 @@
 
 <script>
     function filterTeams() {
-        var input, filter, table, tr, td, i, txtValue;
+        let input, filter, table, i, txtValue, groups, group, matches, matchVisible;
         input = document.getElementById("teamSearch");
         filter = input.value.toUpperCase();
         table = document.querySelectorAll(".team-row");
+        groups = document.querySelectorAll("h1");
+
         for (i = 0; i < table.length; i++) {
-            td = table[i].getElementsByTagName("label")[0];
-            if (td) {
-                txtValue = td.textContent || td.innerText;
+            txtValue = table[i].getAttribute("data-tags");
+            if (txtValue) {
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
                     table[i].style.display = "";
                 } else {
