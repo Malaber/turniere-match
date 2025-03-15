@@ -14,10 +14,23 @@
             border-width: 0 !important;
             width: 100%;
         }
+        .navbar {
+            overflow: hidden;
+            background-color: #333;
+        }
+        .navbar input[type="text"] {
+            float: right;
+            padding: 6px;
+            margin: 8px;
+            border: none;
+        }
     </style>
 </head>
 
 <body>
+<div class="navbar">
+    <input type="text" id="teamSearch" onkeyup="filterTeams()" placeholder="Search for teams..">
+</div>
 {% include 'timer.jinja2' %}
 <hr>
 <!-- Matches -->
@@ -61,7 +74,7 @@
                 {% set name2 = matchscore2['team']['name'] %}
                 {% set score1 = matchscore1['points'] %}
                 {% set score2 = matchscore2['points'] %}
-                <td style="background-color: {% if match.state == 'not_started' %}gray{% elif match.state == 'in_progress' %}yellow{% else %}lime{% endif %}">
+                <td class="team-row" style="background-color: {% if match.state == 'not_started' %}gray{% elif match.state == 'in_progress' %}yellow{% else %}lime{% endif %}">
                     <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}"
                           method="POST" id="match-{{ match.id }}">
                         <input type="hidden" name="matchscore1" value="{{ matchscore1['id'] }}">
@@ -97,6 +110,25 @@
     {% endif %}
 {% endfor %}
 
+<script>
+    function filterTeams() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("teamSearch");
+        filter = input.value.toUpperCase();
+        table = document.querySelectorAll(".team-row");
+        for (i = 0; i < table.length; i++) {
+            td = table[i].getElementsByTagName("label")[0];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    table[i].style.display = "";
+                } else {
+                    table[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
 <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 
