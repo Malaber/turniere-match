@@ -18,36 +18,36 @@
 
 <body>
 {% include 'timer.jinja2' %}
+<hr>
 <!-- Matches -->
 {% for stage in stages %}
     {% set sid = stage['level'] %}
+    {% if not stage.group or loop.first %}
+        <form class="pure-form" action="{{ url_for('next_stage_matches', sid='group' if stage.group else stage['id']) }}" method="POST">
+            <fieldset>
+                <label for="sure-{{ sid }}">
+                    <input id="sure-{{ sid }}" type="checkbox" required> Sicher?
+                </label>
+                <label for="sure2-{{ sid }}">
+                    <input id="sure2-{{ sid }}" type="checkbox" required> Sicher?
+                </label>
+                <button type="submit" class="pure-button pure-button-primary">Nächste Matches starten</button>
+            </fieldset>
+        </form>
+        {% if stage.group %}
+            <form class="pure-form" action="{{ url_for('stop_group_stage', sid=stage['id']) }}" method="POST">
+                <fieldset>
+                    <label for="sure3-{{ sid }}">
+                        <input id="sure3-{{ sid }}" type="checkbox" required> Sicher?
+                    </label>
+                    <button type="submit" class="pure-button pure-button-primary">Gruppenphase beenden</button>
+                </fieldset>
+            </form>
+        {% endif %}
+    {% endif %}
     <h1>
         {% if stage.group %}
             Gruppe {{ sid }}
-        {% else %}
-        {% endif %}
-        {% if not stage.group or loop.first %}
-            <form class="pure-form" action="{{ url_for('next_stage_matches', sid='group' if stage.group else stage['id']) }}" method="POST">
-                <fieldset>
-                    <label for="sure-{{ sid }}">
-                        <input id="sure-{{ sid }}" type="checkbox" required> Sicher?
-                    </label>
-                    <label for="sure2-{{ sid }}">
-                        <input id="sure2-{{ sid }}" type="checkbox" required> Sicher?
-                    </label>
-                    <button type="submit" class="pure-button pure-button-primary">Nächste Matches starten</button>
-                </fieldset>
-            </form>
-            {% if stage.group %}
-                <form class="pure-form" action="{{ url_for('stop_group_stage', sid=stage['id']) }}" method="POST">
-                    <fieldset>
-                        <label for="sure3-{{ sid }}">
-                            <input id="sure3-{{ sid }}" type="checkbox" required> Sicher?
-                        </label>
-                        <button type="submit" class="pure-button pure-button-primary">Gruppenphase beenden</button>
-                    </fieldset>
-                </form>
-            {% endif %}
         {% endif %}
     </h1>
     <table class="pure-table main-table">
