@@ -30,6 +30,7 @@ function clearSearchInput() {
     input.value = "";
     localStorage.removeItem('teamSearch');
     filterTeams();
+    input.focus()
 }
 
 // Focus search input on page load and restore the search term
