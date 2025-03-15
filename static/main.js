@@ -25,6 +25,12 @@ function filterTeams() {
         }
     });
 }
+function clearSearchInput() {
+    const input = document.getElementById("teamSearch");
+    input.value = "";
+    localStorage.removeItem('teamSearch');
+    filterTeams();
+}
 
 // Focus search input on page load and restore the search term
 document.addEventListener('DOMContentLoaded', function() {
