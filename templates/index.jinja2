@@ -44,15 +44,13 @@
             {{ stage.name }}
         </h1>
         <table class="pure-table pure-table-bordered main-table">
-            <tr>
-                {% for match in stage.matches %}
-                    {% include "match_table_match.jinja2" %}
-                    {% if (loop.index % 6) == 0 %} {# 6 matches per row #}
-                        </tr>
-                        <tr>
-                    {% endif %}
-                {% endfor %}
-            </tr>
+            {% for match_row in stage.matches|batch(6) %}
+                <tr>
+                    {% for match in match_row %}
+                        {% include "match_table_match.jinja2" %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
         </table>
         {% if not loop.last %}
             <hr>
