@@ -121,7 +121,7 @@ class Turniere(object):
             raise ValueError('Timer end is required')
 
         try:
-            parsed_time = datetime.datetime.strptime(timer_end, '%Y-%m-%dT%H:%M')
+            parsed_time = datetime.datetime.strptime(timer_end, '%Y-%m-%dT%H:%M:%S')
             if parsed_time is None:
                 raise ValueError('Invalid datetime format')
             if parsed_time <= datetime.datetime.now():
