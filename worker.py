@@ -41,6 +41,9 @@ class Worker(Thread):
                     elif action.type == 'update_team_name':
                         self.instance.update_team_name(action.data[0], action.data[1])
                         break
+                    elif action.type == 'set_timer_end':
+                        self.instance.set_timer_end(action.data)
+                        break
                     else:
                         raise Exception('This shouldn\'t happen')
                 except Exception as e:
