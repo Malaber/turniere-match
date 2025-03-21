@@ -2,6 +2,7 @@ import logging
 import uuid
 
 from flask import Flask, redirect, render_template, request
+from datetime import datetime, timedelta
 
 from config import read_config, MatchConfiguredToNotRunError
 from turniere import Turniere
@@ -139,9 +140,12 @@ def set_timer_seconds():
     timer_end_seconds = request.form['timer_end_seconds']
     main_instance.login()
     try:
+        # we do the calculation of seconds to timestamp ourselves as this is timesensitive and both backends should match
         timer_end_seconds = int(timer_end_seconds)
-        main_instance.set_timer_end_seconds(timer_end_seconds)
-        w.queue.put_nowait(Action('set_timer_seconds', timer_end_seconds))
+        future_time = datetime.now() + timedelta(seconds=timer_end_seconds)
+        future_time_str = future_time.strftime('%Y-%m-%dT%H:%M:%S')
+        main_instance.set_timer_end(future_time_str)
+        w.queue.put_nowait(Action('set_timer', future_time_str))
     except ValueError as e:
         logging.error(f"Failed to set timer in seconds: {e}")
         return redirect('/?error=invalid_seconds')
