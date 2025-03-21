@@ -128,7 +128,7 @@ def set_timer():
     main_instance.login()
     try:
         main_instance.set_timer_end(end_time)
-        w.queue.put_nowait(Action('set_timer_end', end_time))
+        w.queue.put_nowait(Action('set_timer', end_time))
     except ValueError as e:
         logging.error(f"Failed to set timer: {e}")
         return redirect('/?error=invalid_time')
@@ -141,7 +141,7 @@ def set_timer_seconds():
     try:
         timer_end_seconds = int(timer_end_seconds)
         main_instance.set_timer_end_seconds(timer_end_seconds)
-        w.queue.put_nowait(Action('set_timer_end_seconds', timer_end_seconds))
+        w.queue.put_nowait(Action('set_timer_seconds', timer_end_seconds))
     except ValueError as e:
         logging.error(f"Failed to set timer in seconds: {e}")
         return redirect('/?error=invalid_seconds')
