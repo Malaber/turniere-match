@@ -1,0 +1,76 @@
+.button-error {
+    background: rgb(202, 60, 60);
+}
+
+.stage:empty {
+    display: none;
+}
+
+.main-table {
+    border-width: 0 !important;
+    width: 100%;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #333;
+    padding: 0 16px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Ensure it stays above other content */
+}
+
+body {
+    margin-top: 50px; /* Move body down because of the navbar */
+}
+
+.navbar__title {
+    color: white;
+    margin: 0;
+    display: block;
+}
+
+.navbar__timer {
+    color: white;
+    margin: 0;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
+}
+
+.navbar input[type="text"] {
+    padding: 6px 36px 6px 6px; /* Adjust padding to make space for the button */
+    margin: 8px;
+    border: none;
+    width: 250px; /* Adjust width as needed */
+}
+
+.navbar__delete-button {
+    position: absolute;
+    right: 30px;
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Styles for smaller screens */
+@media (max-width: 768px) {
+    .navbar__title {
+        display: none;
+    }
+
+    .navbar__timer {
+        text-align: left;
+    }
+}

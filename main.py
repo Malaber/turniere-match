@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from flask import Flask, redirect, render_template, request
 
@@ -11,12 +12,16 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'changeme(:'
 
+def get_uuid():
+    return str(uuid.uuid4())
+
 try:
     config = read_config()
 except MatchConfiguredToNotRunError:
     print("Match is configured to not run. Exiting.")
     exit(0)
 
+app.jinja_env.globals.update(get_uuid=get_uuid)
 
 main_instance = Turniere(
     config.main_instance_url, config.tournament_code, config.username, config.password
@@ -28,6 +33,18 @@ remote_instance = Turniere(
 
 w = Worker(remote_instance)
 
+
+def get_stage_name(sid):
+    if sid == 0:
+        return 'Finale'
+    elif sid == 1:
+        return 'Halbfinale'
+    elif sid == 2:
+        return 'Viertelfinale'
+    elif sid == 3:
+        return 'Achtelfinale'
+    else:
+        return f'{2 ** sid}tel-Finale'
 
 @app.route('/')
 def index():
@@ -43,6 +60,7 @@ def index():
                     'group': True,
                     'level': group['number'],
                     'matches': sorted(group['matches'], key=lambda m: m['position']),
+                    'name': "Gruppe " + str(group['number']),
                 })
         else:
             stages_simplified.append({
@@ -52,6 +70,7 @@ def index():
                 'matches': sorted(filter(
                     lambda m: m['state'] != 'not_ready', stage['matches']
                 ), key=lambda m: m['position']),
+                'name': get_stage_name(stage['level']),
             })
     return render_template('index.jinja2', stages=stages_simplified, timer=timer)
 

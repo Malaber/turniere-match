@@ -1,31 +1,32 @@
-<!-- Timer -->
-<h1>Timer</h1>
-<p>Current Timer End: <span id="timer">{{ timer }}</span></p>
-<details id="timerFormsDetails">
-    <summary class="pure-button pure-button-primary">Override Timer</summary>
-    <div id="timerForms">
-        <form class="pure-form" action="{{ url_for('set_timer') }}" method="POST">
-            <fieldset>
-                <label for="end_time">New End Time:</label>
-                <input type="datetime-local" id="end_time" name="end_time" required>
-                <button type="submit" class="pure-button pure-button-primary">Set Timer</button>
-            </fieldset>
-        </form>
-        <form class="pure-form" action="{{ url_for('set_timer_seconds') }}" method="POST">
-            <fieldset>
-                <label for="timer_end_minutes">Duration (minutes):</label>
-                <input type="range" id="timer_end_minutes_slider" min="0" max="120" value="20" oninput="updateDuration()">
-                <span id="timer_end_minutes_display">20</span> minutes
-                <br>
-                <label for="timer_end_seconds">Duration (seconds):</label>
-                <input type="range" id="timer_end_seconds_slider" min="0" max="60" value="0" oninput="updateDuration()">
-                <span id="timer_end_seconds_display">0</span> seconds
-                <input type="hidden" id="timer_end_seconds" name="timer_end_seconds" value="1200">
-                <button type="submit" class="pure-button pure-button-primary">Set Timer</button>
-            </fieldset>
-        </form>
-    </div>
-</details>
+<div class="timer-container">
+    <h1>Timer</h1>
+    <p>Current Timer End: <span id="timer">{{ timer }}</span></p>
+    <details id="timerFormsDetails">
+        <summary class="pure-button pure-button">Override Timer</summary>
+        <div id="timerForms">
+            <form class="pure-form" action="{{ url_for('set_timer') }}" method="POST">
+                <fieldset>
+                    <label for="end_time">New End Time:</label>
+                    <input type="datetime-local" id="end_time" name="end_time" required>
+                    <button type="submit" class="pure-button pure-button-primary">Set Timer</button>
+                </fieldset>
+            </form>
+            <form class="pure-form" action="{{ url_for('set_timer_seconds') }}" method="POST">
+                <fieldset>
+                    <label for="timer_end_minutes">Duration (minutes):</label>
+                    <input type="range" id="timer_end_minutes_slider" min="0" max="120" value="20" oninput="updateDuration()">
+                    <span id="timer_end_minutes_display">20</span> minutes
+                    <br>
+                    <label for="timer_end_seconds">Duration (seconds):</label>
+                    <input type="range" id="timer_end_seconds_slider" min="0" max="60" value="0" oninput="updateDuration()">
+                    <span id="timer_end_seconds_display">0</span> seconds
+                    <input type="hidden" id="timer_end_seconds" name="timer_end_seconds" value="1200">
+                    <button type="submit" class="pure-button pure-button-primary">Set Timer</button>
+                </fieldset>
+            </form>
+        </div>
+    </details>
+</div>
 
 <script>
     function updateDuration() {
@@ -42,7 +43,9 @@
             const distance = endTime - now;
 
             if (distance < 0) {
-                document.getElementById('timer').innerText = "EXPIRED";
+                timerEndText = "SPIEL BEENDET"
+                document.getElementById('timer').innerText = timerEndText;
+                document.getElementById('navbarTimer').innerText = timerEndText;
                 clearInterval(timerInterval);
                 return;
             }
@@ -50,8 +53,11 @@
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            const hours_optional = hours? `${hours}h `: '';
 
-            document.getElementById('timer').innerText = `${hours}h ${minutes}m ${seconds}s`;
+            const timerText = `${hours_optional}${minutes}m ${seconds}s`;
+            document.getElementById('timer').innerText = timerText;
+            document.getElementById('navbarTimer').innerText = timerText;
         }
 
         updateTimer();
@@ -62,3 +68,16 @@
     startTimer(timerEnd);
 
 </script>
+
+<style>
+    .timer-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .timer-container h1,
+    .timer-container p,
+    .timer-container details {
+        margin-right: 20px;
+    }
+</style>
