@@ -96,8 +96,8 @@ def next_stage_matches(sid):
 @app.route('/m/<mid>/submit', methods=['POST'])
 def submit_match_result(mid):
     request_form = request.form
-    matchscore1 = request_form['matchscore1']
-    matchscore2 = request_form['matchscore2']
+    matchscore1 = request_form['match_score1']
+    matchscore2 = request_form['match_score2']
     score1 = request_form['score1']
     score2 = request_form['score2']
     is_livescore = 'isLive' in request_form
