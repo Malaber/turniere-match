@@ -1,4 +1,7 @@
 from pathlib import Path
+import time
+import urllib.error
+import urllib.request
 
 from invoke import task
 
@@ -17,6 +20,27 @@ def _python_bin():
     if venv_python.exists():
         return str(venv_python)
     return "python3"
+
+
+def _wait_for_backend(base_url, timeout=30):
+    deadline = time.time() + timeout
+    health_url = f"{base_url.rstrip('/')}/healthz"
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    last_error = None
+
+    while time.time() < deadline:
+        try:
+            with opener.open(health_url) as response:
+                if response.status == 200:
+                    return
+                last_error = f"unexpected status {response.status}"
+        except urllib.error.HTTPError as error:
+            last_error = f"http {error.code}"
+        except Exception as error:
+            last_error = repr(error)
+        time.sleep(0.5)
+
+    raise RuntimeError(f"backend did not become ready at {health_url}: {last_error}")
 
 
 def _write_config(path, username, password, tournament_code, main_instance_url, remote_instance_url):
@@ -65,6 +89,13 @@ def write_config(
     )
 
 
+@task(name="check-backend")
+def check_backend(c, main_instance_url=DEFAULT_MAIN_URL, timeout=30):
+    """Wait for the configured backend healthcheck to respond."""
+    _wait_for_backend(main_instance_url, timeout=int(timeout))
+    print(f"Backend is ready at {main_instance_url}")
+
+
 @task
 def start(
     c,
@@ -76,8 +107,16 @@ def start(
     config_path=DEFAULT_CONFIG_PATH,
     host=DEFAULT_HOST,
     port=DEFAULT_PORT,
+    install=True,
+    wait_for_backend=True,
 ):
     """Write config and start the match UI against a specific backend URL."""
+    if install and not Path(".venv").exists():
+        setup(c)
+
+    if wait_for_backend:
+        _wait_for_backend(main_instance_url)
+
     _write_config(
         config_path,
         username,
