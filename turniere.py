@@ -53,6 +53,9 @@ class Turniere(object):
             f'/tournaments/{self.tournament_code}'
         ).json()['stages']
 
+    def get_group(self, gid):
+        return self._request(f'/groups/{gid}').json()
+
     def next_stage_matches(self, sid):
         logging.info('Starting next playoff matches for %d', sid)
         # fetch stage
