@@ -10,7 +10,7 @@
     align-items: center;
     display: flex;
     gap: 12px;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 .stage__table-button {
