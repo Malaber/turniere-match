@@ -1,4 +1,5 @@
 import logging
+import os
 import uuid
 
 from flask import Flask, redirect, render_template, request
@@ -30,9 +31,14 @@ main_instance = Turniere(
 
 remote_instance = Turniere(
     config.remote_instance_url, config.tournament_code, config.username, config.password
-)
+    ) if config.remote_instance_url and config.remote_instance_url != config.main_instance_url else None
 
-w = Worker(remote_instance)
+w = Worker(remote_instance) if remote_instance else None
+
+
+def enqueue_remote_action(action):
+    if w is not None:
+        w.queue.put_nowait(action)
 
 
 def get_stage_name(sid):
@@ -86,10 +92,10 @@ def next_stage_matches(sid):
     main_instance.login()
     if sid == 'group':
         main_instance.next_group_matches()
-        w.queue.put_nowait(Action('next_group_matches', None))
+        enqueue_remote_action(Action('next_group_matches', None))
     else:
         main_instance.next_stage_matches(str(sid))
-        w.queue.put_nowait(Action('next_stage_matches', sid))
+        enqueue_remote_action(Action('next_stage_matches', sid))
     return redirect('/')
 
 
@@ -104,7 +110,7 @@ def submit_match_result(mid):
     match = Match(mid, matchscore1, matchscore2, score1, score2, is_livescore)
     main_instance.login()
     main_instance.submit_results(match)
-    w.queue.put_nowait(Action('submit_results', match))
+    enqueue_remote_action(Action('submit_results', match))
     return redirect('/#match-' + match.mid)
 
 
@@ -112,7 +118,7 @@ def submit_match_result(mid):
 def stop_group_stage(sid):
     main_instance.login()
     main_instance.stop_group_stage(sid)
-    w.queue.put_nowait(Action('stop_group_stage', sid))
+    enqueue_remote_action(Action('stop_group_stage', sid))
     return redirect('/')
 
 @app.route('/t/<tid>', methods=['POST'])
@@ -120,7 +126,7 @@ def update_team_name(tid):
     new_name = request.form['name']
     main_instance.login()
     main_instance.update_team_name(tid, new_name)
-    w.queue.put_nowait(Action('update_team_name', (tid, new_name)))
+    enqueue_remote_action(Action('update_team_name', (tid, new_name)))
     return redirect('/teams')
 
 @app.route('/set_timer', methods=['POST'])
@@ -129,7 +135,7 @@ def set_timer():
     main_instance.login()
     try:
         main_instance.set_timer_end(end_time)
-        w.queue.put_nowait(Action('set_timer_end', end_time))
+        enqueue_remote_action(Action('set_timer_end', end_time))
     except ValueError as e:
         logging.error(f"Failed to set timer: {e}")
         return redirect('/?error=invalid_time')
@@ -145,12 +151,17 @@ def set_timer_seconds():
         future_time = datetime.now() + timedelta(seconds=timer_end_seconds)
         future_time_str = future_time.strftime('%Y-%m-%dT%H:%M:%S')
         main_instance.set_timer_end(future_time_str)
-        w.queue.put_nowait(Action('set_timer_end', future_time_str))
+        enqueue_remote_action(Action('set_timer_end', future_time_str))
     except ValueError as e:
         logging.error(f"Failed to set timer in seconds: {e}")
         return redirect('/?error=invalid_seconds')
     return redirect('/')
 
 if __name__ == '__main__':
-    w.start()
-    app.run(host='0.0.0.0', port=7070, debug=True)
+    if w is not None:
+        w.start()
+    app.run(
+        host=os.environ.get('HOST', '0.0.0.0'),
+        port=int(os.environ.get('PORT', '7070')),
+        debug=os.environ.get('DEBUG', 'true').lower() == 'true',
+    )

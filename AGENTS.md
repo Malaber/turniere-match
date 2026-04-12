@@ -6,10 +6,30 @@ Runs on port **7070**. No build step; Python 3 with pip dependencies in
 
 ## Default Workflow
 
+Use `tasks.py` and prefer `inv ...` for local setup, config writing, and startup.
+
 ```sh
-pip install -r requirements.txt
-cp config.example.yaml config.yaml   # then fill in real values
-python main.py                        # dev server on :7070
+inv setup
+inv write-config --username=... --password=... --tournament-code=... --main-instance-url=http://127.0.0.1:3000
+inv start --username=... --password=... --tournament-code=... --main-instance-url=http://127.0.0.1:3000
+```
+
+Assume Python 3 is already installed locally.
+
+What the invoke tasks do:
+
+- `inv setup` creates `.venv` and installs `requirements.txt` plus `invoke`
+- `inv write-config ...` writes `config.yaml`
+- `inv check-backend --main-instance-url=...` waits for backend `/healthz`
+- `inv start ...` can auto-run setup on first use, waits for backend health, writes config, and starts Flask on `:7070`
+
+The lower-level manual flow still works:
+
+```sh
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt invoke
+cp config.example.yaml config.yaml
+.venv/bin/python main.py
 ```
 
 In Docker (production) the container is started with `docker-compose up` via
@@ -26,6 +46,11 @@ tournament_code: '8'           # numeric tournament ID from the backend
 main_instance_url: 'http://backend:3000'    # local onsite backend (Docker service name)
 remote_instance_url: 'https://backend.turnie.re'  # internet-facing backend
 ```
+
+For local single-backend development, leave `remote_instance_url` empty.
+In that mode, the app still writes to the main backend but skips the background
+remote replay worker. This avoids double-writing the same action back into the
+same local backend.
 
 To intentionally prevent the service from starting (e.g. no live event is
 running), add `DO_NOT_RUN_MATCH: true` to `config.yaml`. The process will
