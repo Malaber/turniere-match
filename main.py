@@ -1,7 +1,7 @@
 import logging
 import uuid
 
-from flask import Flask, redirect, render_template, request
+from flask import Flask, jsonify, redirect, render_template, request
 from datetime import datetime, timedelta
 
 from config import read_config, MatchConfiguredToNotRunError
@@ -59,6 +59,7 @@ def index():
                 stages_simplified.append({
                     'id': stage['id'],
                     'group': True,
+                    'group_id': group['id'],
                     'level': group['number'],
                     'matches': sorted(group['matches'], key=lambda m: m['position']),
                     'name': "Gruppe " + str(group['number']),
@@ -74,6 +75,17 @@ def index():
                 'name': get_stage_name(stage['level']),
             })
     return render_template('index.jinja2', stages=stages_simplified, timer=timer)
+
+
+@app.route('/groups/<gid>/table')
+def group_table(gid):
+    group = main_instance.get_group(gid)
+    group_scores = sorted(group['group_scores'], key=lambda score: score['position'])
+    return jsonify({
+        'id': group['id'],
+        'number': group['number'],
+        'scores': group_scores,
+    })
 
 @app.route('/teams')
 def teams():

@@ -6,6 +6,17 @@
     display: none;
 }
 
+.stage__header {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.stage__table-button {
+    flex-shrink: 0;
+}
+
 .main-table {
     border-width: 0 !important;
     width: 100%;
@@ -25,6 +36,10 @@
 
 body {
     margin-top: 50px; /* Move body down because of the navbar */
+}
+
+body.modal-open {
+    overflow: hidden;
 }
 
 .navbar__title {
@@ -64,6 +79,54 @@ body {
     cursor: pointer;
 }
 
+.group-table-modal {
+    inset: 0;
+    position: fixed;
+    z-index: 2000;
+}
+
+.group-table-modal__backdrop {
+    background: rgba(0, 0, 0, 0.45);
+    inset: 0;
+    position: absolute;
+}
+
+.group-table-modal__dialog {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+    left: 50%;
+    max-height: calc(100vh - 48px);
+    max-width: 720px;
+    overflow: auto;
+    padding: 20px;
+    position: relative;
+    top: 24px;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+}
+
+.group-table-modal__header {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.group-table-modal__status {
+    margin: 12px 0;
+}
+
+.group-table-modal__table {
+    margin-top: 12px;
+    width: 100%;
+}
+
+.group-table-modal__table th,
+.group-table-modal__table td {
+    text-align: left;
+}
+
 /* Styles for smaller screens */
 @media (max-width: 768px) {
     .navbar__title {
@@ -72,5 +135,15 @@ body {
 
     .navbar__timer {
         text-align: left;
+    }
+
+    .stage__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .group-table-modal__header {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }

@@ -40,9 +40,22 @@
 {% for stage in stages %}
     <div class="stage">
         {% set sid = stage['level'] %}
-        <h1>
-            {{ stage.name }}
-        </h1>
+        <div class="stage__header">
+            <h1>
+                {{ stage.name }}
+            </h1>
+            {% if stage.group %}
+                <button
+                    type="button"
+                    class="pure-button stage__table-button"
+                    data-group-id="{{ stage.group_id }}"
+                    data-group-name="{{ stage.name }}"
+                    onclick="openGroupTableModal(this)"
+                >
+                    Tabelle
+                </button>
+            {% endif %}
+        </div>
         <table class="pure-table pure-table-bordered main-table">
             {% for match_row in stage.matches|batch(6) %}
                 <tr>
@@ -57,6 +70,35 @@
         {% endif %}
     </div>
 {% endfor %}
+
+<div id="groupTableModal" class="group-table-modal" hidden>
+    <div class="group-table-modal__backdrop" onclick="closeGroupTableModal()"></div>
+    <div
+        class="group-table-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="groupTableModalTitle"
+    >
+        <div class="group-table-modal__header">
+            <h2 id="groupTableModalTitle">Tabelle</h2>
+            <button type="button" class="pure-button group-table-modal__close" onclick="closeGroupTableModal()">Schließen</button>
+        </div>
+        <div id="groupTableModalStatus" class="group-table-modal__status" hidden></div>
+        <table class="pure-table pure-table-striped group-table-modal__table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Team</th>
+                    <th>Punkte</th>
+                    <th>Differenz</th>
+                    <th>Geworfen</th>
+                </tr>
+            </thead>
+            <tbody id="groupTableModalBody">
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
