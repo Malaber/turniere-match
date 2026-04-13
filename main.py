@@ -43,6 +43,17 @@ def enqueue_remote_action(action):
         w.queue.put_nowait(action)
 
 
+def local_timezone():
+    return datetime.now().astimezone().tzinfo
+
+
+def normalize_timer_end(timer_end):
+    parsed_time = datetime.fromisoformat(timer_end)
+    if parsed_time.tzinfo is None:
+        parsed_time = parsed_time.replace(tzinfo=local_timezone())
+    return parsed_time.isoformat(timespec='seconds')
+
+
 def get_stage_name(sid):
     if sid == 0:
         return 'Finale'
@@ -145,7 +156,7 @@ def update_team_name(tid):
 
 @app.route('/set_timer', methods=['POST'])
 def set_timer():
-    end_time = request.form['end_time']
+    end_time = normalize_timer_end(request.form['end_time'])
     main_instance.login()
     try:
         main_instance.set_timer_end(end_time)
@@ -162,8 +173,8 @@ def set_timer_seconds():
     try:
         # we do the calculation of seconds to timestamp ourselves as this is timesensitive and both backends should match
         timer_end_seconds = int(timer_end_seconds)
-        future_time = datetime.now() + timedelta(seconds=timer_end_seconds)
-        future_time_str = future_time.strftime('%Y-%m-%dT%H:%M:%S')
+        future_time = datetime.now().astimezone() + timedelta(seconds=timer_end_seconds)
+        future_time_str = future_time.isoformat(timespec='seconds')
         main_instance.set_timer_end(future_time_str)
         enqueue_remote_action(Action('set_timer_end', future_time_str))
     except ValueError as e:
