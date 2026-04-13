@@ -3,6 +3,7 @@ import os
 import uuid
 
 from flask import Flask, jsonify, redirect, render_template, request
+from flask_socketio import SocketIO, join_room
 from datetime import datetime, timedelta
 
 from config import read_config, MatchConfiguredToNotRunError
@@ -13,6 +14,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'changeme(:'
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 def get_uuid():
     return str(uuid.uuid4())
@@ -169,10 +171,79 @@ def set_timer_seconds():
         return redirect('/?error=invalid_seconds')
     return redirect('/')
 
+DISPLAY_STATES = [
+    ('matches_all', 'Alle Matches'),
+    ('matches_in_progress', 'Laufende Matches'),
+    ('matches_upcoming', 'Kommende Matches'),
+    ('matches_not_started', 'Bereit zum Starten'),
+    ('matches_finished', 'Beendete Matches'),
+    ('groups', 'Gruppenstand'),
+    ('between_games', 'Zwischen den Spielen'),
+    ('during_game', 'Während dem Spiel'),
+]
+
+
+@app.route('/beamers')
+def beamers_page():
+    main_instance.login()
+    beamers = main_instance.get_beamers()
+    return render_template('beamers.jinja2', beamers=beamers,
+                           display_states=DISPLAY_STATES)
+
+
+@app.route('/beamer/create', methods=['POST'])
+def create_beamer():
+    name = request.form['name']
+    display_state = request.form.get('display_state', 'matches_all')
+    is_default = 'is_default' in request.form
+    qr_code_url = request.form.get('qr_code_url') or None
+    logo_url = request.form.get('logo_url') or None
+    main_instance.login()
+    main_instance.create_beamer(name, display_state, is_default, qr_code_url, logo_url)
+    enqueue_remote_action(Action('create_beamer', (name, display_state, is_default, qr_code_url, logo_url)))
+    return redirect('/beamers')
+
+
+@app.route('/beamer/<bid>/update', methods=['POST'])
+def update_beamer_state(bid):
+    new_state = request.form['display_state']
+    main_instance.login()
+    beamer = main_instance.get_beamer(bid)
+    main_instance.update_beamer(bid, display_state=new_state)
+    enqueue_remote_action(Action('update_beamer', (beamer['name'], new_state)))
+    socketio.emit('beamer_state_changed', {
+        'beamer_name': beamer['name'],
+        'display_state': new_state,
+    }, to='beamer_' + beamer['name'])
+    return redirect('/beamers')
+
+
+@app.route('/beamer/<bid>/delete', methods=['POST'])
+def delete_beamer(bid):
+    main_instance.login()
+    beamer = main_instance.get_beamer(bid)
+    main_instance.delete_beamer(bid)
+    enqueue_remote_action(Action('delete_beamer', beamer['name']))
+    return redirect('/beamers')
+
+
+@socketio.on('connect')
+def handle_connect():
+    logging.info('Fullscreen client connected via Socket.IO')
+
+
+@socketio.on('join_beamer')
+def handle_join_beamer(data):
+    beamer_name = data.get('beamer_name', 'default')
+    join_room('beamer_' + beamer_name)
+    logging.info(f'Client joined room beamer_{beamer_name}')
+
+
 if __name__ == '__main__':
     if w is not None:
         w.start()
-    app.run(
+    socketio.run(
+        app,
         host=os.environ.get('HOST', '0.0.0.0'),
         port=int(os.environ.get('PORT', '7070')),
         debug=os.environ.get('DEBUG', 'true').lower() == 'true',
