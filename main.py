@@ -6,7 +6,7 @@ from flask import Flask, jsonify, redirect, render_template, request
 from datetime import datetime, timedelta
 
 from config import read_config, MatchConfiguredToNotRunError
-from turniere import Turniere
+from turniere import Turniere, TurniereRequestError
 from worker import Action, Match, Worker
 
 logging.basicConfig(level=logging.DEBUG)
@@ -53,6 +53,20 @@ def get_stage_name(sid):
     else:
         return f'{2 ** sid}tel-Finale'
 
+
+def query_error():
+    error = request.args.get('error')
+    if not error:
+        return None
+
+    if error == 'decider_required':
+        return 'Playoffs können noch nicht gestartet werden. Für einen relevanten Gleichstand muss zuerst ein Entscheidungsmatch gespielt werden.'
+
+    if error == 'group_stage_not_over':
+        return 'Die Gruppenphase kann noch nicht beendet werden. Es laufen noch Spiele oder es fehlen Ergebnisse.'
+
+    return 'Die Aktion konnte nicht ausgeführt werden.'
+
 @app.route('/')
 def index():
     timer = main_instance.get_timer_end()
@@ -80,7 +94,7 @@ def index():
                 ), key=lambda m: m['position']),
                 'name': get_stage_name(stage['level']),
             })
-    return render_template('index.jinja2', stages=stages_simplified, timer=timer)
+    return render_template('index.jinja2', stages=stages_simplified, timer=timer, error_message=query_error())
 
 
 @app.route('/groups/<gid>/table')
@@ -90,6 +104,7 @@ def group_table(gid):
     return jsonify({
         'id': group['id'],
         'number': group['number'],
+        'decider_matches': [match for match in group['matches'] if match.get('decider')],
         'scores': group_scores,
     })
 
@@ -119,17 +134,37 @@ def submit_match_result(mid):
     score1 = request_form['score1']
     score2 = request_form['score2']
     is_livescore = 'isLive' in request_form
-    match = Match(mid, matchscore1, matchscore2, score1, score2, is_livescore)
+    score_field = request_form.get('score_field', 'points')
+    match = Match(mid, matchscore1, matchscore2, score1, score2, is_livescore, score_field)
     main_instance.login()
     main_instance.submit_results(match)
     enqueue_remote_action(Action('submit_results', match))
     return redirect('/#match-' + match.mid)
 
 
+@app.route('/groups/<gid>/matches', methods=['POST'])
+def create_decider_match(gid):
+    team_ids = [request.form.get('team_id_1'), request.form.get('team_id_2')]
+    team_ids = [int(team_id) for team_id in team_ids if team_id]
+    main_instance.login()
+    match = main_instance.create_decider_match(gid, team_ids)
+    enqueue_remote_action(Action('create_decider_match', (gid, team_ids)))
+    return redirect('/#match-' + str(match['id']))
+
+
 @app.route('/m/<sid>/stop', methods=['POST'])
 def stop_group_stage(sid):
     main_instance.login()
-    main_instance.stop_group_stage(sid)
+    try:
+        main_instance.stop_group_stage(sid)
+    except TurniereRequestError as error:
+        if error.status_code == 422:
+            body = error.body if isinstance(error.body, dict) else {}
+            if body.get('blocking_ties'):
+                return redirect('/?error=decider_required')
+            if body.get('error') == 'Group Stage still has some matches that are not over yet. Finish them to generate playoffs':
+                return redirect('/?error=group_stage_not_over')
+        raise
     enqueue_remote_action(Action('stop_group_stage', sid))
     return redirect('/')
 

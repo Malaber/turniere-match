@@ -10,6 +10,7 @@ Use `tasks.py` and prefer `inv ...` for local setup, config writing, and startup
 
 ```sh
 inv setup
+inv test
 inv write-config --username=... --password=... --tournament-code=... --main-instance-url=http://127.0.0.1:3000
 inv start --username=... --password=... --tournament-code=... --main-instance-url=http://127.0.0.1:3000
 ```
@@ -19,6 +20,7 @@ Assume Python 3 is already installed locally.
 What the invoke tasks do:
 
 - `inv setup` creates `.venv` and installs `requirements.txt` plus `invoke`
+- `inv test` runs the local Python unit tests with `unittest`
 - `inv write-config ...` writes `config.yaml`
 - `inv check-backend --main-instance-url=...` waits for backend `/healthz`
 - `inv start ...` can auto-run setup on first use, waits for backend health, writes config, and starts Flask on `:7070`
@@ -90,6 +92,7 @@ Worker handles these `Action.type` strings:
 | `next_group_matches` | starts first unplayed match in each group |
 | `next_stage_matches` | starts all matches in a playoff stage |
 | `submit_results` | sets both match scores, optionally finishes match |
+| `create_decider_match` | creates a decider match for two teams inside one group |
 | `stop_group_stage` | patches stage state to `finished` |
 | `update_team_name` | renames a team |
 | `set_timer_end` | sets tournament countdown timer end timestamp |
@@ -103,11 +106,30 @@ from `login()`. The API contract mirrors `turniere-backend` routes:
 - `GET /tournaments/:code` → stages, teams, timer
 - `GET /stages/:id` → stage detail (for next_stage_matches)
 - `PATCH /matches/:id` → change match state (`in_progress` / `finished`)
-- `PATCH /match_scores/:id` → set score points
+- `PATCH /match_scores/:id` → set score points or decider `hidden_points`
+- `POST /groups/:group_id/matches` → create a decider match
 - `PATCH /stages/:id` → finish a stage
 - `PATCH /teams/:id` → rename team
 - `GET /tournaments/:code/timer_end` → current timer
 - `PATCH /tournaments/:code/set_timer_end` → set timer
+
+## Decider Matches
+
+The backend now exposes decider matches for unresolved group-stage ties that
+matter for advancement.
+
+- The operator UI surfaces tie information inside the existing group table modal.
+- If the backend marks a tie as `needs_decider_match`, the modal shows a compact
+  "Anlegen" action for the affected pair.
+- Creating the decider writes to the main backend first and is queued to the
+  remote backend through the same worker used for other live actions.
+- Decider matches are rendered in the stage grid like normal matches, but score
+  entry writes `hidden_points` instead of normal `points`.
+- Those decider scores are only used to resolve the tied teams and must not
+  distort the normal group table math.
+- If the operator tries to finish the group stage while a relevant tie still
+  needs a decider, the backend returns `422` and the UI shows a helpful warning
+  instead of crashing.
 
 ## Timer Calculation
 
