@@ -42,6 +42,15 @@ body.modal-open {
     overflow: hidden;
 }
 
+.page-error {
+    background: #fff3cd;
+    border: 1px solid #ffe69c;
+    border-radius: 6px;
+    color: #664d03;
+    margin: 16px 0;
+    padding: 12px 16px;
+}
+
 .navbar__title {
     color: white;
     margin: 0;
@@ -124,7 +133,38 @@ body.modal-open {
 
 .group-table-modal__table th,
 .group-table-modal__table td {
+    vertical-align: top;
     text-align: left;
+}
+
+.group-table-modal__decision {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 160px;
+}
+
+.group-table-modal__decision-text {
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+
+.group-table-modal__decision-button {
+    font-size: 0.85rem;
+    padding: 0.4em 0.9em;
+}
+
+.match-card__label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.match-card__hint {
+    color: #555;
+    display: block;
+    margin: 8px 0 10px;
 }
 
 /* Styles for smaller screens */
@@ -145,5 +185,10 @@ body.modal-open {
     .group-table-modal__header {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .group-table-modal__table {
+        display: block;
+        overflow-x: auto;
     }
 }
