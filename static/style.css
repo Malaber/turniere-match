@@ -55,6 +55,22 @@ body.modal-open {
     text-align: center;
 }
 
+.navbar__beamer-link,
+.navbar__back-link {
+    color: white;
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.navbar__beamer-link:hover,
+.navbar__back-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .search-wrapper {
     position: relative;
     display: flex;
