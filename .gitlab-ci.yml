@@ -12,7 +12,9 @@ include:
 
 match unit tests:
   stage: test
-  image: python:3.9
+  tags:
+    - docker
+  image: python:3.14
   rules:
     - if: $SKIP_TEST
       when: never
