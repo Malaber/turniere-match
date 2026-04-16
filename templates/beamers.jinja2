@@ -24,7 +24,6 @@
         <tr>
             <th>Name</th>
             <th>Anzeige</th>
-            <th>Standard</th>
             <th>Aktionen</th>
         </tr>
     </thead>
@@ -50,7 +49,6 @@
                     <button type="submit" class="pure-button pure-button-primary">Aktualisieren</button>
                 </form>
             </td>
-            <td>{% if beamer.is_default %}Ja{% else %}Nein{% endif %}</td>
             <td>
                 <form action="{{ url_for('delete_beamer', bid=beamer.id) }}" method="POST" style="display: inline;"
                       onsubmit="return confirm('Beamer &quot;{{ beamer.name }}&quot; wirklich löschen?');">
@@ -84,10 +82,6 @@
 
         <label for="logo_url">Logo URL (optional)</label>
         <input type="url" id="logo_url" name="logo_url" placeholder="https://... oder /static/images/..." style="width: 100%;">
-
-        <label class="pure-checkbox" style="margin-top: 10px;">
-            <input type="checkbox" name="is_default"> Standard-Beamer
-        </label>
 
         <button type="submit" class="pure-button pure-button-primary" style="margin-top: 10px;">Erstellen</button>
     </fieldset>

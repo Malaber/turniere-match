@@ -180,12 +180,11 @@ class Turniere(object):
             f'/tournaments/{self.tournament_code}/beamers/by_name?name={name}'
         ).json()
 
-    def create_beamer(self, name, display_state='matches_all', is_default=False,
+    def create_beamer(self, name, display_state='matches_all',
                       qr_code_url=None, logo_url=None):
         payload = {
             'name': name,
             'display_state': display_state,
-            'is_default': is_default,
         }
         if qr_code_url:
             payload['qr_code_url'] = qr_code_url

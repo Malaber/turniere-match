@@ -241,12 +241,11 @@ def beamers_page():
 def create_beamer():
     name = request.form['name']
     display_state = request.form.get('display_state', 'matches_all')
-    is_default = 'is_default' in request.form
     qr_code_url = request.form.get('qr_code_url') or None
     logo_url = request.form.get('logo_url') or None
     main_instance.login()
-    main_instance.create_beamer(name, display_state, is_default, qr_code_url, logo_url)
-    enqueue_remote_action(Action('create_beamer', (name, display_state, is_default, qr_code_url, logo_url)))
+    main_instance.create_beamer(name, display_state, qr_code_url, logo_url)
+    enqueue_remote_action(Action('create_beamer', (name, display_state, qr_code_url, logo_url)))
     return redirect('/beamers')
 
 
