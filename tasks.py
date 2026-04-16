@@ -68,6 +68,12 @@ def setup(c):
     c.run(".venv/bin/pip install -r requirements.txt invoke", pty=True)
 
 
+@task
+def test(c):
+    """Run the local unit test suite."""
+    c.run(f"{_python_bin()} -m unittest discover -s tests", pty=True)
+
+
 @task(name="write-config")
 def write_config(
     c,

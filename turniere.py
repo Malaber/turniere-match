@@ -3,6 +3,20 @@ import datetime
 import requests
 
 
+class TurniereRequestError(Exception):
+    def __init__(self, method, path, response):
+        self.method = method
+        self.path = path
+        self.status_code = response.status_code if response is not None else None
+        self.response = response
+        try:
+            self.body = response.json()
+        except Exception:
+            self.body = response.text if response is not None else ''
+
+        super().__init__(f'{method} {path} failed with status {self.status_code}: {self.body}')
+
+
 class Turniere(object):
     def __init__(self, base_url, tournament_code, email, password):
         self.base_url = base_url
@@ -11,19 +25,19 @@ class Turniere(object):
         self.password = password
         self.request_headers = {}
 
-    def _request(self, path, method='GET', json={}):
+    def _request(self, path, method='GET', json=None):
         s = requests.Session()
         req = requests.Request(
             method,
             self.base_url + path,
             headers=self.request_headers,
-            json=json
+            json=json or {}
         )
         r = s.send(req.prepare())
         if r:
             return r
         else:
-            raise Exception(f'Invalid response: {r}: {r.json()}')
+            raise TurniereRequestError(method, path, r)
 
     def _start_match(self, mid):
         self._request(f'/matches/{mid}', method='PATCH', json={
@@ -88,14 +102,15 @@ class Turniere(object):
         })
 
     def submit_results(self, match):
+        score_field = match.score_field or 'points'
         self._request(
             f'/match_scores/{match.matchscore1}', method='PATCH', json={
-                'points': match.score1
+                score_field: match.score1
             }
         )
         self._request(
             f'/match_scores/{match.matchscore2}', method='PATCH', json={
-                'points': match.score2
+                score_field: match.score2
             }
         )
         if not match.is_live:
@@ -103,6 +118,11 @@ class Turniere(object):
             self._request(f'/matches/{match.mid}', method='PATCH', json={
                 'state': 'finished'
             })
+
+    def create_decider_match(self, gid, team_ids):
+        return self._request(f'/groups/{gid}/matches', method='POST', json={
+            'team_ids': team_ids
+        }).json()
 
     def get_teams(self):
         return self._request(

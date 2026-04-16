@@ -7,7 +7,7 @@ from threading import Thread
 Action = namedtuple('Action', ['type', 'data'])
 Match = namedtuple(
     'Match',
-    ['mid', 'matchscore1', 'matchscore2', 'score1', 'score2', 'is_live']
+    ['mid', 'matchscore1', 'matchscore2', 'score1', 'score2', 'is_live', 'score_field']
 )
 
 
@@ -34,6 +34,9 @@ class Worker(Thread):
                         break
                     elif action.type == 'submit_results':
                         self.instance.submit_results(action.data)
+                        break
+                    elif action.type == 'create_decider_match':
+                        self.instance.create_decider_match(action.data[0], action.data[1])
                         break
                     elif action.type == 'stop_group_stage':
                         self.instance.stop_group_stage(action.data)

@@ -9,3 +9,21 @@ variables:
 include:
   - project: 'turniere/turniere-infra'
     file: '/ci/pipeline.yaml'
+
+match unit tests:
+  stage: test
+  tags:
+    - docker
+  image: python:3.14
+  rules:
+    - if: $SKIP_TEST
+      when: never
+    - if: $SKIP_MATCH_TEST
+      when: never
+    - if: $CI_PIPELINE_SOURCE != "push"
+      when: never
+    - when: always
+  script:
+    - python -m venv .venv
+    - .venv/bin/pip install -r requirements.txt invoke
+    - .venv/bin/inv test

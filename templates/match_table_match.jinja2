@@ -3,8 +3,10 @@
 {% set match_score2 = match_scores[1] %}
 {% set team_name1 = match_score1['team']['name'] %}
 {% set team_name2 = match_score2['team']['name'] %}
-{% set team_score1 = match_score1['points'] %}
-{% set team_score2 = match_score2['points'] %}
+{% set is_decider = match.get('decider') %}
+{% set score_field = 'hidden_points' if is_decider else 'points' %}
+{% set team_score1 = match_score1[score_field] %}
+{% set team_score2 = match_score2[score_field] %}
 {% set table_number = match.position + 1 %}
 {% set table_id = "Gruppe {}".format(sid) if stage.group else "Tisch {}".format(table_number) %}
 {% set next_table_id = "Tisch {}".format(((table_number) // 2) + (table_number % 2)) if not stage.group %}
@@ -13,12 +15,20 @@
     <form class="pure-form pure-form-stacked" action="{{ url_for('submit_match_result', mid=match.id) }}" method="POST" id="match-{{ match.id }}">
         <input type="hidden" name="match_score1" value="{{ match_score1['id'] }}">
         <input type="hidden" name="match_score2" value="{{ match_score2['id'] }}">
+        <input type="hidden" name="score_field" value="{{ score_field }}">
         <fieldset>
+            {% if is_decider %}
+                <div class="match-card__label">Entscheidungsmatch</div>
+            {% endif %}
             <label for="score1-{{ match.id }}">{{ team_name1 }}</label>
             <input name="score1" id="score1-{{ match.id }}" type="number" value="{{ team_score1 }}">
 
             <label for="score2-{{ match.id }}">{{ team_name2 }}</label>
             <input name="score2" id="score2-{{ match.id }}" type="number" value="{{ team_score2 }}">
+
+            {% if is_decider %}
+                <small class="match-card__hint">Zählt nur fürs Entscheidungsmatch. Keine normalen Gruppenpunkte.</small>
+            {% endif %}
 
             <label for="isLive-{{ match.id }}" class="pure-checkbox">
                 Live <input name="isLive" id="isLive-{{ match.id }}" type="checkbox" {% if match.state == 'in_progress' %}checked{% endif %}>

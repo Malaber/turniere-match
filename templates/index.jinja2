@@ -22,6 +22,12 @@
 </div>
 {% include 'timer.jinja2' %}
 <hr>
+{% if error_message %}
+    <div class="page-error" role="alert">
+        {{ error_message }}
+    </div>
+    <hr>
+{% endif %}
 <details>
     <summary class="pure-button">Manage Next Matches</summary>
     {% for stage in stages %}
@@ -93,6 +99,7 @@
                     <th>Punkte</th>
                     <th>Differenz</th>
                     <th>Geworfen</th>
+                    <th>Entscheidung</th>
                 </tr>
             </thead>
             <tbody id="groupTableModalBody">
