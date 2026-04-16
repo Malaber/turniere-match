@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Turnie.re Beamer Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='pure.css') }}" integrity="sha256-fPXvMqJjeydW056U7AUM/dp5L+sRz0xPK0Mx3p20nkI=">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+<div class="navbar">
+    <h1 class="navbar__title">Beamer Control</h1>
+    <a href="/" class="navbar__back-link">Zurück zum Admin</a>
+</div>
+
+<h2>Aktive Beamer</h2>
+
+{% if beamers %}
+<table class="pure-table pure-table-bordered" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Anzeige</th>
+            <th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for beamer in beamers %}
+        <tr>
+            <td>
+                <strong>{{ beamer.name }}</strong>
+                {% if beamer.qr_code_url %}
+                    <br><small>QR: {{ beamer.qr_code_url }}</small>
+                {% endif %}
+                {% if beamer.logo_url %}
+                    <br><small>Logo: {{ beamer.logo_url }}</small>
+                {% endif %}
+            </td>
+            <td>
+                <form class="pure-form" action="{{ url_for('update_beamer_state', bid=beamer.id) }}" method="POST" style="display: inline;">
+                    <select name="display_state">
+                        {% for value, label in display_states %}
+                        <option value="{{ value }}" {% if beamer.display_state == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="pure-button pure-button-primary">Aktualisieren</button>
+                </form>
+            </td>
+            <td>
+                <form action="{{ url_for('delete_beamer', bid=beamer.id) }}" method="POST" style="display: inline;"
+                      onsubmit="return confirm('Beamer &quot;{{ beamer.name }}&quot; wirklich löschen?');">
+                    <button type="submit" class="pure-button button-error">Löschen</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Keine Beamer vorhanden. Erstelle einen neuen Beamer unten.</p>
+{% endif %}
+
+<hr>
+<h2>Neuen Beamer erstellen</h2>
+<form class="pure-form pure-form-stacked" action="{{ url_for('create_beamer') }}" method="POST" style="max-width: 500px;">
+    <fieldset>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="z.B. Hauptbeamer" required style="width: 100%;">
+
+        <label for="display_state">Anzeige</label>
+        <select id="display_state" name="display_state" style="width: 100%;">
+            {% for value, label in display_states %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="qr_code_url">QR-Code URL (optional)</label>
+        <input type="url" id="qr_code_url" name="qr_code_url" placeholder="https://..." style="width: 100%;">
+
+        <label for="logo_url">Logo URL (optional)</label>
+        <input type="url" id="logo_url" name="logo_url" placeholder="https://... oder /static/images/..." style="width: 100%;">
+
+        <button type="submit" class="pure-button pure-button-primary" style="margin-top: 10px;">Erstellen</button>
+    </fieldset>
+</form>
+
+</body>
+</html>

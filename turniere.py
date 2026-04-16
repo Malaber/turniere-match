@@ -144,10 +144,10 @@ class Turniere(object):
             raise ValueError('Timer end is required')
 
         try:
-            parsed_time = datetime.datetime.strptime(timer_end, '%Y-%m-%dT%H:%M:%S')
-            if parsed_time is None:
-                raise ValueError('Invalid datetime format')
-            if parsed_time <= datetime.datetime.now():
+            parsed_time = datetime.datetime.fromisoformat(timer_end)
+            if parsed_time.tzinfo is None:
+                parsed_time = parsed_time.replace(tzinfo=datetime.datetime.now().astimezone().tzinfo)
+            if parsed_time <= datetime.datetime.now(tz=parsed_time.tzinfo):
                 raise ValueError('Timer end must be in the future')
         except ValueError as e:
             raise ValueError(f'Invalid datetime format: {e}')
@@ -166,3 +166,51 @@ class Turniere(object):
         self._request(f'/tournaments/{self.tournament_code}/set_timer_end', method='PATCH', json={
             'timer_end_seconds': timer_end_seconds
         })
+
+    # --- Beamer management ---
+
+    def get_beamers(self):
+        return self._request(f'/tournaments/{self.tournament_code}/beamers').json()
+
+    def get_beamer(self, bid):
+        return self._request(f'/tournaments/{self.tournament_code}/beamers/{bid}').json()
+
+    def get_beamer_by_name(self, name):
+        return self._request(
+            f'/tournaments/{self.tournament_code}/beamers/by_name?name={name}'
+        ).json()
+
+    def create_beamer(self, name, display_state='matches_all',
+                      qr_code_url=None, logo_url=None):
+        payload = {
+            'name': name,
+            'display_state': display_state,
+        }
+        if qr_code_url:
+            payload['qr_code_url'] = qr_code_url
+        if logo_url:
+            payload['logo_url'] = logo_url
+        return self._request(
+            f'/tournaments/{self.tournament_code}/beamers',
+            method='POST', json=payload
+        ).json()
+
+    def update_beamer(self, bid, **kwargs):
+        return self._request(
+            f'/tournaments/{self.tournament_code}/beamers/{bid}',
+            method='PATCH', json=kwargs
+        ).json()
+
+    def update_beamer_by_name(self, name, display_state):
+        beamer = self.get_beamer_by_name(name)
+        return self.update_beamer(beamer['id'], display_state=display_state)
+
+    def delete_beamer(self, bid):
+        self._request(
+            f'/tournaments/{self.tournament_code}/beamers/{bid}',
+            method='DELETE'
+        )
+
+    def delete_beamer_by_name(self, name):
+        beamer = self.get_beamer_by_name(name)
+        self.delete_beamer(beamer['id'])

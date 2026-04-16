@@ -47,6 +47,15 @@ class Worker(Thread):
                     elif action.type == 'set_timer_end':
                         self.instance.set_timer_end(action.data)
                         break
+                    elif action.type == 'create_beamer':
+                        self.instance.create_beamer(*action.data)
+                        break
+                    elif action.type == 'update_beamer':
+                        self.instance.update_beamer_by_name(action.data[0], action.data[1])
+                        break
+                    elif action.type == 'delete_beamer':
+                        self.instance.delete_beamer_by_name(action.data)
+                        break
                     else:
                         raise Exception('This shouldn\'t happen')
                 except Exception as e:
