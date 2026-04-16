@@ -124,10 +124,10 @@ class Turniere(object):
             raise ValueError('Timer end is required')
 
         try:
-            parsed_time = datetime.datetime.strptime(timer_end, '%Y-%m-%dT%H:%M:%S')
-            if parsed_time is None:
-                raise ValueError('Invalid datetime format')
-            if parsed_time <= datetime.datetime.now():
+            parsed_time = datetime.datetime.fromisoformat(timer_end)
+            if parsed_time.tzinfo is None:
+                parsed_time = parsed_time.replace(tzinfo=datetime.datetime.now().astimezone().tzinfo)
+            if parsed_time <= datetime.datetime.now(tz=parsed_time.tzinfo):
                 raise ValueError('Timer end must be in the future')
         except ValueError as e:
             raise ValueError(f'Invalid datetime format: {e}')
