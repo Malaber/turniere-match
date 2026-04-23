@@ -1,5 +1,3 @@
 requests
 flask
-flask-socketio
-eventlet
 pyyaml
