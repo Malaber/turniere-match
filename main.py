@@ -3,7 +3,6 @@ import os
 import uuid
 
 from flask import Flask, jsonify, redirect, render_template, request
-from flask_socketio import SocketIO, join_room
 from datetime import datetime, timedelta
 
 from config import read_config, MatchConfiguredToNotRunError
@@ -14,7 +13,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'changeme(:'
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 def get_uuid():
     return str(uuid.uuid4())
@@ -256,10 +254,6 @@ def update_beamer_state(bid):
     beamer = main_instance.get_beamer(bid)
     main_instance.update_beamer(bid, display_state=new_state)
     enqueue_remote_action(Action('update_beamer', (beamer['name'], new_state)))
-    socketio.emit('beamer_state_changed', {
-        'beamer_name': beamer['name'],
-        'display_state': new_state,
-    }, to='beamer_' + beamer['name'])
     return redirect('/beamers')
 
 
@@ -271,24 +265,10 @@ def delete_beamer(bid):
     enqueue_remote_action(Action('delete_beamer', beamer['name']))
     return redirect('/beamers')
 
-
-@socketio.on('connect')
-def handle_connect():
-    logging.info('Fullscreen client connected via Socket.IO')
-
-
-@socketio.on('join_beamer')
-def handle_join_beamer(data):
-    beamer_name = data.get('beamer_name', 'default')
-    join_room('beamer_' + beamer_name)
-    logging.info(f'Client joined room beamer_{beamer_name}')
-
-
 if __name__ == '__main__':
     if w is not None:
         w.start()
-    socketio.run(
-        app,
+    app.run(
         host=os.environ.get('HOST', '0.0.0.0'),
         port=int(os.environ.get('PORT', '7070')),
         debug=os.environ.get('DEBUG', 'true').lower() == 'true',
