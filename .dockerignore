@@ -1,1 +1,8 @@
 config.yaml
+.git
+.gitlab-ci.yml
+.gitignore
+AGENTS.md
+Makefile
+docker-compose.yml
+tests/
